@@ -100,7 +100,7 @@ body.app-body {
 
 .app-login {
     display: grid;
-    grid-template-columns: 1fr 38%;
+    grid-template-columns: 1fr 40%;
     min-height: 100vh;
 }
 
@@ -1020,6 +1020,16 @@ html[lang="es"] #kc-totp-supported-apps::after {
 #kc-totp-settings-form .pf-c-form__label {
     display: inline-block;
     margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.form-actions .pf-c-button {
+    flex: 1;
 }
 
 @media (max-width: 1100px) {
