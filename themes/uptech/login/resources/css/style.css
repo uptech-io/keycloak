@@ -52,9 +52,9 @@
     --grey-900: #07111F;
     --black: #000000;
     --white: #FFFFFF;
-    --app-primary: var(--primary-main);
-    --app-primary-hover: var(--primary-dark);
-    --app-accent: var(--primary-main);
+    --app-primary: var(--grey-900);
+    --app-primary-hover: var(--grey-800);
+    --app-accent: var(--grey-900);
     --app-ink: var(--grey-900);
     --app-text: var(--grey-700);
     --app-muted: var(--grey-500);
@@ -65,7 +65,7 @@
     --app-radius: 4px;
     --app-radius-sm: 4px;
     --app-shadow: 0 18px 48px rgba(7, 17, 31, .10), 0 4px 12px rgba(7, 17, 31, .06);
-    --app-ring: 0 0 0 3px rgba(0, 31, 156, .18);
+    --app-ring: 0 0 0 3px rgba(7, 17, 31, .18);
     --font-primary: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, sans-serif;
     --font-secondary: var(--font-primary);
@@ -228,6 +228,23 @@ body.app-body {
 #kc-attempted-username {
     font-weight: 600;
     color: var(--app-text);
+}
+
+#reset-login {
+    display: inline-flex;
+    align-items: center;
+    color: var(--app-muted);
+    line-height: 0;
+}
+
+#reset-login:hover {
+    color: var(--app-ink);
+}
+
+/* Remove o tooltip de hover ("Reiniciar o login") herdado do login.css base.
+   O aria-label do link mantem o nome acessivel p/ leitores de tela. */
+#reset-login .kc-tooltip-text {
+    display: none;
 }
 
 #kc-content,
@@ -607,7 +624,7 @@ input.pf-c-button.pf-m-primary,
 
 .pf-c-button.pf-m-primary:focus-visible {
     outline: none;
-    box-shadow: var(--app-ring), 0 6px 16px rgba(0, 31, 156, .24);
+    box-shadow: var(--app-ring), 0 6px 16px rgba(7, 17, 31, .24);
 }
 
 .pf-c-button.pf-m-primary:active {
@@ -1086,5 +1103,113 @@ html[lang="es"] #kc-totp-supported-apps::after {
     .app-toast,
     .app-toast--hiding {
         animation: none !important;
+    }
+}
+
+/* ============ Tela de OTP (Codigo de uso unico) ============
+   Escopada por data-page-id p/ nao afetar outras telas que mostram o usuario.
+   Titulo + ajuda vem do template (msg appOtpTitle/appOtpHelp); aqui ajustamos
+   o e-mail como linha secundaria, o icone de reiniciar e o campo do codigo. */
+[data-page-id="login-login-otp"] .app-attempted-user {
+    margin-top: 6px;
+}
+
+/* Label do campo fica oculto visualmente (titulo + ajuda ja explicam);
+   mantido no DOM para leitores de tela. */
+[data-page-id="login-login-otp"] #kc-otp-login-form label[for="otp"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Campo do codigo em destaque: centralizado, espacado e maior. */
+[data-page-id="login-login-otp"] #otp {
+    height: 56px;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 26px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: .4em;
+    text-indent: .4em; /* compensa o espacamento a direita do ultimo digito */
+}
+
+[data-page-id="login-login-otp"] #kc-form-buttons {
+    margin-top: 16px;
+}
+
+/* OTP segmentado (montado por js/otp-segments.js). Quando o JS marca o form com
+   data-otp-enhanced, o #otp real fica oculto (mas submetivel) e as caixas assumem.
+   Sem JS, o #otp acima continua visivel como fallback. */
+[data-page-id="login-login-otp"] #kc-otp-login-form[data-otp-enhanced] #otp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+}
+
+[data-page-id="login-login-otp"] .app-otp-segments {
+    display: flex;
+    gap: 10px;
+}
+
+[data-page-id="login-login-otp"] .app-otp-box {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 56px;
+    padding: 0;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 24px;
+    font-weight: var(--fw-semibold);
+    color: var(--app-ink);
+    background: #fff;
+    border: 1px solid var(--app-border-strong);
+    border-radius: var(--app-radius-sm);
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+[data-page-id="login-login-otp"] .app-otp-box:hover {
+    border-color: var(--grey-400);
+}
+
+[data-page-id="login-login-otp"] .app-otp-box:focus {
+    border-color: var(--app-accent);
+    box-shadow: var(--app-ring);
+}
+
+[data-page-id="login-login-otp"] .app-otp-box--error {
+    border-color: var(--error-main);
+}
+
+[data-page-id="login-login-otp"] .app-otp-box--error:focus {
+    box-shadow: 0 0 0 3px rgba(240, 68, 56, .20);
+}
+
+/* respiro maior no meio (ex.: 6 digitos = 3 + 3) */
+[data-page-id="login-login-otp"] .app-otp-box--group-end {
+    margin-right: 8px;
+}
+
+@media (max-width: 480px) {
+    [data-page-id="login-login-otp"] .app-otp-segments {
+        gap: 7px;
+    }
+    [data-page-id="login-login-otp"] .app-otp-box {
+        height: 52px;
+        font-size: 20px;
+    }
+    [data-page-id="login-login-otp"] .app-otp-box--group-end {
+        margin-right: 5px;
     }
 }

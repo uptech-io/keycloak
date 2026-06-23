@@ -2,7 +2,7 @@
 
 <#macro appLegalFooter>
     <div class="app-footer__legal">
-        <span>&copy; 2026 UPTECH. ${msg("appRights")}</span>
+        <span>&copy; ${.now?string('yyyy')} UPTECH. ${msg("appRights")}</span>
         <a href="${properties.appPrivacyUrl!'#'}">${msg("appPrivacyPolicy")}</a>
         <a href="${properties.appTermsUrl!'#'}">${msg("appTermsPolicy")}</a>
     </div>
@@ -100,7 +100,7 @@
     <aside class="app-aside">
         <div class="app-aside__content">
            
-            <img class="app-aside__logo" src="${url.resourcesPath}/img/logo-single.png" alt="${properties.appBrandName!'Uptech'}" />
+            <img class="app-aside__logo" src="${url.resourcesPath}/img/idm.png" alt="${properties.appBrandName!'Uptech'}" />
             <h2 class="app-aside__title">${msg("appWelcomeTitle")?no_esc}</h2>
             <p class="app-aside__subtitle">${msg("appWelcomeSubtitle")}</p>
         </div>
@@ -139,6 +139,13 @@
                         </#if>
                         <h1 id="kc-page-title" class="app-form__title"><#nested "header"></h1>
                     <#else>
+                        <#-- Telas que ja identificaram o usuario substituem o titulo padrao
+                             pelo bloco do usuario. So na tela de OTP injetamos titulo + ajuda
+                             proprios; o e-mail abaixo vira linha secundaria. -->
+                        <#if pageId == "login-otp">
+                            <h1 id="kc-page-title" class="app-form__title">${msg("appOtpTitle")}</h1>
+                            <p class="app-form__subhead">${msg("appOtpHelp")}</p>
+                        </#if>
                         <#if displayRequiredFields>
                             <div class="app-required-note"><span class="required">*</span> ${msg("requiredFields")}</div>
                         </#if>
