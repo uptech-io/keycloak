@@ -1,7 +1,9 @@
-README.md
-docker-compose.yml
 .git
 .gitignore
+.claude
+CLAUDE.md
+README.md
+build.sh
 .DS_Store
 node_modules
 dist

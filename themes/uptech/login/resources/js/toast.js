@@ -1,19 +1,30 @@
 /*
- * Uptech SSO — Toast / Snackbar
- * Carregado como script externo (via theme.properties `scripts=js/toast.js`)
- * porque o CSP do Keycloak bloqueia <script> inline.
- *
- * Comportamento:
- *  - Se o servidor renderizou um toast global (#app-toast, mensagem global do KC),
- *    apenas liga o fechar + auto-hide.
- *  - Senao, se houver erro de campo (ex.: credenciais invalidas, que o KC mostra
- *    inline via messagesPerField), gera um toast de erro a partir desse texto.
- *    O erro inline e mantido como registro persistente apos o toast sumir.
+ * Uptech SSO — Toast / Snackbar (script externo; theme.properties `scripts=`).
+ * Poe html.js na carga: so com JS o style.css esconde os erros de campo inline
+ * (sem JS eles ficam visiveis, como no base).
+ * Com #app-toast no HTML (mensagem global do KC), so liga fechar + auto-hide.
+ * Sem ele, promove CADA erro de campo (#input-error / .pf-m-error) a um toast
+ * proprio, prefixado com o rotulo do campo quando houver (dois campos com o mesmo
+ * erro = dois toasts), empilhados no container #app-toasts (criado aqui se o
+ * template nao o emitiu).
  */
 (function () {
     "use strict";
 
+    document.documentElement.classList.add("js");
+
     var AUTOHIDE = 6000; // ms
+
+    function container() {
+        var c = document.getElementById("app-toasts");
+        if (!c) {
+            c = document.createElement("div");
+            c.className = "app-toasts";
+            c.id = "app-toasts";
+            document.body.appendChild(c);
+        }
+        return c;
+    }
 
     function wire(t) {
         var done = false;
@@ -54,18 +65,28 @@
         t.appendChild(icon);
         t.appendChild(span);
         t.appendChild(close);
-        document.body.appendChild(t);
+        container().appendChild(t);
         return t;
     }
 
+    // "input-error-<campo>" (user-profile-commons.ftl do base) -> texto do label[for=campo]
+    function fieldLabel(err, txt) {
+        var m = /^input-error-(.+)$/.exec(err.id || "");
+        var label = m && document.querySelector('label[for="' + m[1] + '"]');
+        var name = label ? (label.textContent || "").replace(/\s+/g, " ").trim() : "";
+        return name && txt.indexOf(name) === -1 ? name + ": " + txt : txt;
+    }
+
     function init() {
-        var t = document.getElementById("app-toast");
-        if (!t) {
-            var err = document.querySelector("#input-error, .pf-c-form__helper-text.pf-m-error");
-            var txt = err && err.textContent ? err.textContent.trim() : "";
-            if (txt) t = build(txt, "error");
+        var server = document.getElementById("app-toast");
+        if (server) { wire(server); return; }
+
+        var errs = document.querySelectorAll("#input-error, .pf-c-form__helper-text.pf-m-error");
+        for (var i = 0; i < errs.length; i++) {
+            var txt = (errs[i].textContent || "").replace(/\s+/g, " ").trim();
+            if (!txt) continue;
+            wire(build(fieldLabel(errs[i], txt), "error"));
         }
-        if (t) wire(t);
     }
 
     if (document.readyState === "loading") {

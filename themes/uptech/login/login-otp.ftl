@@ -1,7 +1,3 @@
-<#-- Override de login-otp.ftl (base keycloak 26.6).
-     Copia fiel do template base; a UNICA mudanca e o campo #otp ganhar
-     inputmode="numeric" + pattern="[0-9]*" (teclado numerico no mobile).
-     Ao atualizar o Keycloak, comparar com o login-otp.ftl base e re-sincronizar. -->
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('totp'); section>
     <#if section="header">

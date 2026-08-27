@@ -7,6 +7,15 @@
         url("../fonts/manrope-latin-variable.woff2") format("woff2");
 }
 
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 800;
+    src: url("../fonts/jetbrains-mono-latin-variable.woff2") format("woff2-variations"),
+        url("../fonts/jetbrains-mono-latin-variable.woff2") format("woff2");
+}
+
 :root {
     --primary-lighter: #E5EBFF;
     --primary-light: #6B86FF;
@@ -68,7 +77,7 @@
     --app-ring: 0 0 0 3px rgba(7, 17, 31, .18);
     --font-primary: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, sans-serif;
-    --font-secondary: var(--font-primary);
+    --font-secondary: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --app-font: var(--font-primary);
     --fw-light: 300;
     --fw-regular: 400;
@@ -131,7 +140,7 @@ body.app-body {
 
 .app-aside__title {
     margin: 0;
-    font-family: var(--font-secondary);
+    font-family: var(--font-primary);
     font-size: clamp(24px, 3.4vw, 34px);
     line-height: 1.334;
     font-weight: 600;
@@ -143,13 +152,6 @@ body.app-body {
     color: var(--secondary-main);
 }
 
-.app-aside__subtitle {
-    margin: 18px auto 0;
-    max-width: 550px;
-    font-size: 16px;
-    line-height: 1.5;
-    color: rgba(255,255,255,0.6);
-}
 
 .app-main {
     position: relative;
@@ -168,11 +170,13 @@ body.app-body {
     gap: 20px;
 }
 
+/* Monograma acima do titulo do formulario: so no mobile (<=860px), quando o
+   painel escuro com a logo some; no desktop fica oculto. */
 .app-form__logo {
-    display: block;
-    height: 40px;
+    display: none;
+    height: 78px;
     width: auto;
-    margin: 0 0 26px;
+    margin: 0 auto 26px;
 }
 
 .app-form__header {
@@ -241,8 +245,8 @@ body.app-body {
     color: var(--app-ink);
 }
 
-/* Remove o tooltip de hover ("Reiniciar o login") herdado do login.css base.
-   O aria-label do link mantem o nome acessivel p/ leitores de tela. */
+/* Oculta o tooltip de hover do login.css base; o aria-label do link
+   (template.ftl) mantem o nome acessivel. */
 #reset-login .kc-tooltip-text {
     display: none;
 }
@@ -386,6 +390,13 @@ label.pf-c-form__label,
 
 .pf-c-form__label-text {
     color: inherit;
+}
+
+/* Cadastro/perfil (user-profile-commons.ftl do base): o <span class="required">*</span>
+   e irmao do <label>; com o label em block ele cairia na linha de baixo. */
+.pf-c-form__label:has(+ .required) {
+    display: inline-block;
+    margin-right: 4px;
 }
 
 input.pf-c-form-control,
@@ -533,9 +544,18 @@ input.pf-c-form-control:focus,
     mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22%23000%22%20d=%22M9.75%2012a2.25%202.25%200%201%201%204.5%200a2.25%202.25%200%200%201-4.5%200%22/%3E%3Cpath%20fill=%22%23000%22%20fill-rule=%22evenodd%22%20d=%22M2%2012c0%201.64.425%202.191%201.275%203.296C4.972%2017.5%207.818%2020%2012%2020s7.028-2.5%208.725-4.704C21.575%2014.192%2022%2013.639%2022%2012c0-1.64-.425-2.191-1.275-3.296C19.028%206.5%2016.182%204%2012%204S4.972%206.5%203.275%208.704C2.425%209.81%202%2010.361%202%2012m10-3.75a3.75%203.75%200%201%200%200%207.5a3.75%203.75%200%200%200%200-7.5%22%20clip-rule=%22evenodd%22/%3E%3C/svg%3E");
 }
 
+/* Erros de campo: sem JS ficam visiveis inline (estilo abaixo); com JS o
+   toast.js poe html.js e os promove a toast, entao aqui somem. */
 #input-error,
-.pf-c-form__helper-text.pf-m-error,
-.kcInputErrorMessageClass {
+.pf-c-form__helper-text.pf-m-error {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--error-dark);
+}
+
+html.js #input-error,
+html.js .pf-c-form__helper-text.pf-m-error {
     display: none;
 }
 
@@ -577,7 +597,8 @@ input.pf-c-form-control:focus,
 .login-pf-settings a,
 #kc-info a,
 #kc-registration a,
-a#try-another-way {
+a#try-another-way,
+a#switch-organization {
     color: var(--app-accent);
     font-weight: 600;
     text-decoration: none;
@@ -587,7 +608,8 @@ a#try-another-way {
 #kc-form-options a:hover,
 #kc-info a:hover,
 #kc-registration a:hover,
-a#try-another-way:hover {
+a#try-another-way:hover,
+a#switch-organization:hover {
     text-decoration: underline;
 }
 
@@ -645,66 +667,8 @@ input.pf-c-button.pf-m-primary,
     background: var(--grey-100);
 }
 
-.app-alert.pf-c-alert {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 18px;
-    padding: 13px 15px;
-    border: 1px solid transparent;
-    border-radius: var(--app-radius-sm);
-    font-size: 13.5px;
-    line-height: 1.45;
-}
-
-.app-alert .pf-c-alert__icon {
-    margin-top: 1px;
-}
-
-.app-alert .kc-feedback-text {
-    font-weight: 500;
-}
-
-.app-alert.pf-m-danger {
-    background: var(--error-lighter);
-    border-color: var(--error-light);
-    color: var(--error-darker);
-}
-
-.app-alert.pf-m-danger .pf-c-alert__icon {
-    color: var(--error-main);
-}
-
-.app-alert.pf-m-success {
-    background: var(--success-lighter);
-    border-color: var(--success-light);
-    color: var(--success-darker);
-}
-
-.app-alert.pf-m-success .pf-c-alert__icon {
-    color: var(--success-main);
-}
-
-.app-alert.pf-m-warning {
-    background: var(--warning-lighter);
-    border-color: var(--warning-light);
-    color: var(--warning-darker);
-}
-
-.app-alert.pf-m-warning .pf-c-alert__icon {
-    color: var(--warning-main);
-}
-
-.app-alert.pf-m-info {
-    background: var(--primary-lighter);
-    border-color: var(--primary-light);
-    color: var(--primary-darker);
-}
-
-.app-alert.pf-m-info .pf-c-alert__icon {
-    color: var(--primary-main);
-}
-
+/* Seletor de idioma segue no DOM (template.ftl) mas oculto: o idioma vem do
+   Accept-Language ou do atributo locale do usuario. */
 .app-locale {
     display: none;
 }
@@ -836,15 +800,23 @@ ul.pf-c-dropdown__menu,
     order: 1;
 }
 
-.app-toast {
+/* Container fixo onde os toasts empilham (o do servidor vem no template.ftl;
+   toast.js cria os de erro de campo dentro dele). */
+.app-toasts {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 1200;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     gap: 10px;
     max-width: min(380px, calc(100vw - 40px));
+}
+
+.app-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     padding: 13px 14px;
     border-radius: var(--app-radius-sm);
     box-shadow: 0 8px 24px rgba(7, 17, 31, .22), 0 2px 6px rgba(7, 17, 31, .12);
@@ -1012,7 +984,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
 
 #kc-totp-secret-key {
     display: inline-block;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--font-secondary);
     font-size: 15px;
     letter-spacing: .08em;
     color: var(--app-ink);
@@ -1066,12 +1038,11 @@ html[lang="es"] #kc-totp-supported-apps::after {
         display: block;
         margin-top: 4px;
     }
+    .app-form__logo {
+        display: block;
+    }
     .app-main {
         padding: 40px 18px;
-    }
-    .app-form__logo {
-        margin-left: auto;
-        margin-right: auto;
     }
     #kc-totp-settings {
         text-align: left;
@@ -1085,10 +1056,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     .app-form__title {
         font-size: 24px;
     }
-    .app-form__logo {
-        height: 36px;
-    }
-    .app-toast {
+    .app-toasts {
         top: 12px;
         right: 12px;
         left: 12px;
@@ -1107,15 +1075,14 @@ html[lang="es"] #kc-totp-supported-apps::after {
 }
 
 /* ============ Tela de OTP (Codigo de uso unico) ============
-   Escopada por data-page-id p/ nao afetar outras telas que mostram o usuario.
-   Titulo + ajuda vem do template (msg appOtpTitle/appOtpHelp); aqui ajustamos
-   o e-mail como linha secundaria, o icone de reiniciar e o campo do codigo. */
+   Escopado por data-page-id: .app-attempted-user e #kc-form-buttons tambem
+   aparecem em outras telas. */
 [data-page-id="login-login-otp"] .app-attempted-user {
     margin-top: 6px;
 }
 
-/* Label do campo fica oculto visualmente (titulo + ajuda ja explicam);
-   mantido no DOM para leitores de tela. */
+/* Label so visualmente oculto: alem dos leitores de tela, otp-segments.js usa
+   o texto dele no aria-label das caixas. */
 [data-page-id="login-login-otp"] #kc-otp-login-form label[for="otp"] {
     position: absolute;
     width: 1px;
@@ -1128,11 +1095,10 @@ html[lang="es"] #kc-totp-supported-apps::after {
     border: 0;
 }
 
-/* Campo do codigo em destaque: centralizado, espacado e maior. */
 [data-page-id="login-login-otp"] #otp {
     height: 56px;
     text-align: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--font-secondary);
     font-size: 26px;
     font-weight: var(--fw-semibold);
     letter-spacing: .4em;
@@ -1143,9 +1109,8 @@ html[lang="es"] #kc-totp-supported-apps::after {
     margin-top: 16px;
 }
 
-/* OTP segmentado (montado por js/otp-segments.js). Quando o JS marca o form com
-   data-otp-enhanced, o #otp real fica oculto (mas submetivel) e as caixas assumem.
-   Sem JS, o #otp acima continua visivel como fallback. */
+/* OTP segmentado: com data-otp-enhanced (js/otp-segments.js) o #otp fica oculto
+   mas continua sendo o campo enviado; sem JS ele segue visivel como fallback. */
 [data-page-id="login-login-otp"] #kc-otp-login-form[data-otp-enhanced] #otp {
     position: absolute;
     width: 1px;
@@ -1168,7 +1133,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     height: 56px;
     padding: 0;
     text-align: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--font-secondary);
     font-size: 24px;
     font-weight: var(--fw-semibold);
     color: var(--app-ink);
@@ -1196,7 +1161,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     box-shadow: 0 0 0 3px rgba(240, 68, 56, .20);
 }
 
-/* respiro maior no meio (ex.: 6 digitos = 3 + 3) */
+/* respiro no meio; otp-segments.js poe a classe no 3o digito (de 6) */
 [data-page-id="login-login-otp"] .app-otp-box--group-end {
     margin-right: 8px;
 }
@@ -1212,4 +1177,207 @@ html[lang="es"] #kc-totp-supported-apps::after {
     [data-page-id="login-login-otp"] .app-otp-box--group-end {
         margin-right: 5px;
     }
+}
+
+/* ============ Chave de seguranca / escolha de metodo ============
+   Telas do base (webauthn-authenticate, select-authenticator e
+   login-passkeys-conditional-authenticate) vestidas so com CSS. As classes
+   app-icon--* vem do theme.properties (kcWebAuthn* / kcAuthenticator*), no
+   lugar dos icones FontAwesome/PatternFly. Titulo + ajuda: template.ftl. */
+.app-icon {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: currentColor;
+    -webkit-mask: var(--app-icon) center / contain no-repeat;
+    mask: var(--app-icon) center / contain no-repeat;
+}
+
+.app-icon--key { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%2012h9M18%2012v3M15%2012v2.5%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--usb { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203l-2%203h4zM12%206v13M12%2021a2%202%200%201%200%200-4M8%2011v3l4%202.5M16%2010v3l-4%202.5%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--nfc { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%209a9%209%200%200%201%200%206M8.5%2010.5a5%205%200%200%201%200%203M19%209a9%209%200%200%200%200%206M15.5%2010.5a5%205%200%200%200%200%203%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--bluetooth { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207.5l10%209-5%204.5V3l5%204.5-10%209%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--device { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%222.5%22%20width%3D%2210%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M11%2018h2%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--password { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%2211%22%20width%3D%2214%22%20height%3D%2210%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%2011V8a4%204%200%200%201%208%200v3%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--otp { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%222.5%22%20width%3D%2210%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M10%2012h.01M12%2012h.01M14%2012h.01%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--codes { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%207h9M8%2012h9M8%2017h9M5%207h.01M5%2012h.01M5%2017h.01%22%2F%3E%3C%2Fsvg%3E"); }
+.app-icon--chevron { --app-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%206l6%206-6%206%22%2F%3E%3C%2Fsvg%3E"); }
+
+/* Cards: lista de chaves cadastradas e opcoes de metodo (markup pf-l-split do base) */
+.app-body .select-auth-container {
+    padding: 0;
+}
+
+.app-body .select-auth-box-paragraph {
+    margin: 0 0 8px;
+    text-align: left;
+    font-size: 13px;
+    color: var(--app-muted);
+}
+
+.app-body .select-auth-box-parent,
+#kc-form-webauthn .select-auth-box-parent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 12px 14px;
+    font: inherit;
+    color: var(--app-text);
+    background: #fff;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-sm);
+    text-align: left;
+}
+
+#kc-form-webauthn .pf-l-stack__item {
+    margin: 0;
+}
+
+.app-body .select-auth-box-icon,
+#kc-form-webauthn .select-auth-box-icon {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    color: var(--app-ink);
+    background: var(--app-bg);
+    border-radius: var(--app-radius-sm);
+}
+
+.app-body .select-auth-box-headline,
+#kc-form-webauthn .select-auth-box-headline {
+    margin: 0;
+    font-family: var(--font-primary);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: var(--fw-semibold);
+    color: var(--app-ink);
+}
+
+.app-body .select-auth-box-desc,
+#kc-form-webauthn .select-auth-box-desc {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--app-muted);
+}
+
+#kc-form-webauthn [id^="kc-webauthn-authenticator-created-"] {
+    font-family: var(--font-secondary);
+    font-size: 12px;
+}
+
+.app-body .select-auth-box-arrow {
+    margin: 0;
+    color: var(--app-muted);
+}
+
+/* select-authenticator: cada opcao e um <button> */
+[data-page-id="login-select-authenticator"] .select-auth-box-parent {
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+
+[data-page-id="login-select-authenticator"] .select-auth-box-parent:hover {
+    background: var(--grey-100);
+    border-color: var(--app-border-strong);
+}
+
+[data-page-id="login-select-authenticator"] .select-auth-box-parent:focus-visible {
+    outline: none;
+    border-color: var(--app-ink);
+    box-shadow: var(--app-ring);
+}
+
+/* Botao "Entrar com chave de seguranca" (webauthn-authenticate): <input>, sem
+   icone (texto centralizado nao combina com icone na borda). Espera: js/passkey.js. */
+
+#authenticateWebAuthnButton[aria-busy="true"] {
+    opacity: .7;
+    cursor: progress;
+}
+
+/* Login com passkeys habilitadas no realm (login.ftl + passkeys.ftl do 26.7): o
+   base emite <a id="authenticateWebAuthnButton"> com kcButtonSecondaryClass (vazia
+   no tema pai), logo abaixo do "Entrar". Vira botao secundario contornado com icone. */
+a#authenticateWebAuthnButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 46px;
+    margin-top: 12px;
+    color: var(--app-ink);
+    background: #fff;
+    border: 1px solid var(--app-border-strong);
+    border-radius: var(--app-radius-sm);
+    font-size: 15px;
+    font-weight: var(--fw-bold);
+    text-decoration: none;
+    transition: background .15s;
+}
+
+a#authenticateWebAuthnButton::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%2012h9M18%2012v3M15%2012v2.5%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%2012h9M18%2012v3M15%2012v2.5%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+}
+
+a#authenticateWebAuthnButton:hover {
+    background: var(--grey-100);
+}
+
+a#authenticateWebAuthnButton:focus-visible {
+    outline: none;
+    box-shadow: var(--app-ring);
+}
+
+/* Bootstrap do login.css base: margin 0 -15px em .form-horizontal .form-group e
+   padding 0 15px nas col-*; aqui os cards nao estao em col-*, entao zera os dois. */
+#kc-form-webauthn .form-group {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+#kc-form-webauthn #kc-form-buttons {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+[data-page-id="login-webauthn-authenticate"] #kc-form-buttons {
+    margin-top: 8px;
+}
+
+[data-page-id="login-webauthn-authenticate"] #kc-select-try-another-way-form {
+    margin-top: 14px;
+    text-align: center;
+}
+
+/* Login com passkey (UI condicional, login-passkeys-conditional-authenticate):
+   o <input> aparece abaixo do "Entrar" como secundario, igual a ancora do login. */
+#kc-form-passkey-button {
+    margin-top: 12px;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+#kc-form-passkey-button #authenticateWebAuthnButton {
+    height: 46px;
+    color: var(--app-ink);
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid var(--app-border-strong);
+    font-weight: var(--fw-bold);
+}
+
+#kc-form-passkey-button #authenticateWebAuthnButton:hover {
+    background-color: var(--grey-100);
 }

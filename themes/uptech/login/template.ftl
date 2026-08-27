@@ -1,14 +1,14 @@
 <#import "footer.ftl" as loginFooter>
+<#import "theme-resources.ftl" as themeResourceTags>
 
 <#macro appLegalFooter>
     <div class="app-footer__legal">
-        <span>&copy; ${.now?string('yyyy')} UPTECH. ${msg("appRights")}</span>
-        <a href="${properties.appPrivacyUrl!'#'}">${msg("appPrivacyPolicy")}</a>
-        <a href="${properties.appTermsUrl!'#'}">${msg("appTermsPolicy")}</a>
+        <span>&copy; ${.now?string('yyyy')} ${(properties.appBrandName!'Uptech')?upper_case}. ${msg("appRights")}</span>
+        <a href="${(properties.appPrivacyUrl!'')?has_content?then(properties.appPrivacyUrl, '#')}">${msg("appPrivacyPolicy")}</a>
+        <a href="${(properties.appTermsUrl!'')?has_content?then(properties.appTermsUrl, '#')}">${msg("appTermsPolicy")}</a>
     </div>
 </#macro>
-<#-- registrationLayout: layout split (aside de marketing + formulario branco).
-     Mantem a assinatura/secoes do template base p/ nao quebrar as paginas herdadas. -->
+
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayRequiredFields=false>
 <!DOCTYPE html>
 <html lang="${lang}"<#if realm.internationalizationEnabled> dir="${(locale.rtl)?then('rtl','ltr')}"</#if>>
@@ -22,19 +22,29 @@
             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
         </#list>
     </#if>
-    <title>${msg("loginTitle",(realm.displayName!''))}</title>
-    <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
-    <#if properties.stylesCommon?has_content>
+    <title>${title!}</title>
+    <#if themeResources?? && themeResources.favicons?has_content>
+        <@themeResourceTags.renderFavicons themeResources.favicons url.resourcesPath />
+    <#else>
+        <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+    </#if>
+    <#if themeResources?? && themeResources.stylesCommon?has_content>
+        <@themeResourceTags.renderStyles themeResources.stylesCommon url.resourcesCommonPath />
+    <#elseif properties.stylesCommon?has_content>
         <#list properties.stylesCommon?split(' ') as style>
             <link href="${url.resourcesCommonPath}/${style}" rel="stylesheet" />
         </#list>
     </#if>
-    <#if properties.styles?has_content>
+    <#if themeResources?? && themeResources.styles?has_content>
+        <@themeResourceTags.renderStyles themeResources.styles url.resourcesPath />
+    <#elseif properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
         </#list>
     </#if>
-    <#if properties.scripts?has_content>
+    <#if themeResources?? && themeResources.scripts?has_content>
+        <@themeResourceTags.renderScripts themeResources.scripts url.resourcesPath "text/javascript" />
+    <#elseif properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
             <script src="${url.resourcesPath}/${script}" type="text/javascript"></script>
         </#list>
@@ -53,11 +63,13 @@
         </#list>
     </#if>
     <script type="module">
-        import { startSessionPolling } from "${url.resourcesPath}/js/authChecker.js";
+        <#outputformat "JavaScript">
+        import { startSessionPolling } from ${(url.resourcesPath + "/js/authChecker.js")?c};
 
         startSessionPolling(
-            "${url.ssoLoginInOtherTabsUrl?no_esc}"
+            ${url.ssoLoginInOtherTabsUrl?c}
         );
+        </#outputformat>
     </script>
     <script type="module">
         document.addEventListener("click", (event) => {
@@ -84,34 +96,33 @@
     </script>
     <#if authenticationSession??>
         <script type="module">
-            import { checkAuthSession } from "${url.resourcesPath}/js/authChecker.js";
+            <#outputformat "JavaScript">
+            import { checkAuthSession } from ${(url.resourcesPath + "/js/authChecker.js")?c};
 
             checkAuthSession(
-                "${authenticationSession.authSessionIdHash}"
+                ${authenticationSession.authSessionIdHash?c}
             );
+            </#outputformat>
         </script>
     </#if>
 </head>
 
-<body class="app-body" data-page-id="login-${pageId}" data-toast-close="${msg('appClose')}">
+<body class="app-body" data-page-id="login-${pageId}" data-toast-close="${msg('appClose')}" data-passkey-waiting="${msg('appPasskeyWaiting')}">
 <div class="app-login">
 
-    <#-- ============ Painel de marketing (aside) ============ -->
     <aside class="app-aside">
         <div class="app-aside__content">
-           
+
             <img class="app-aside__logo" src="${url.resourcesPath}/img/idm.png" alt="${properties.appBrandName!'Uptech'}" />
             <h2 class="app-aside__title">${msg("appWelcomeTitle")?no_esc}</h2>
-            <p class="app-aside__subtitle">${msg("appWelcomeSubtitle")}</p>
         </div>
         <footer class="app-footer--aside"><@appLegalFooter/></footer>
     </aside>
 
-    <#-- ============ Painel do formulario ============ -->
     <main class="app-main">
         <div class="app-main__inner">
 
-            <#-- Seletor de idioma -->
+            <#-- Renderizado como no base, mas oculto: .app-locale { display:none } no style.css. -->
             <#if realm.internationalizationEnabled && locale.supported?size gt 1>
                 <div class="app-locale" id="kc-locale">
                     <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
@@ -133,18 +144,23 @@
 
             <div class="app-form" id="kc-form-card">
                 <header class="app-form__header">
+                    <img class="app-form__logo" src="${url.resourcesPath}/img/logo-single.png" alt="${properties.appBrandName!'Uptech'}" />
                     <#if !(auth?has_content && auth.showUsername() && !auth.showResetCredentials())>
                         <#if displayRequiredFields>
                             <div class="app-required-note"><span class="required">*</span> ${msg("requiredFields")}</div>
                         </#if>
                         <h1 id="kc-page-title" class="app-form__title"><#nested "header"></h1>
                     <#else>
-                        <#-- Telas que ja identificaram o usuario substituem o titulo padrao
-                             pelo bloco do usuario. So na tela de OTP injetamos titulo + ajuda
-                             proprios; o e-mail abaixo vira linha secundaria. -->
-                        <#if pageId == "login-otp">
-                            <h1 id="kc-page-title" class="app-form__title">${msg("appOtpTitle")}</h1>
-                            <p class="app-form__subhead">${msg("appOtpHelp")}</p>
+                        <#-- Aqui o base troca o titulo pelo bloco do usuario; nas telas
+                             abaixo reinjetamos titulo + ajuda proprios (o e-mail vira linha
+                             secundaria). Nova tela = nova entrada + chaves app* nos 3 bundles. -->
+                        <#assign appPageTitle = {"login-otp": "appOtpTitle", "webauthn-authenticate": "appPasskeyTitle", "select-authenticator": "appChooseTitle"}>
+                        <#assign appPageHelp = {"login-otp": "appOtpHelp", "webauthn-authenticate": "appPasskeyHelp", "select-authenticator": "appChooseHelp"}>
+                        <#if appPageTitle[pageId]??>
+                            <h1 id="kc-page-title" class="app-form__title">${msg(appPageTitle[pageId])}</h1>
+                            <#if appPageHelp[pageId]??>
+                                <p class="app-form__subhead">${msg(appPageHelp[pageId])}</p>
+                            </#if>
                         </#if>
                         <#if displayRequiredFields>
                             <div class="app-required-note"><span class="required">*</span> ${msg("requiredFields")}</div>
@@ -161,9 +177,8 @@
                         </div>
                     </#if>
 
-                    <#-- Info/cadastro abaixo do titulo. Sem os ids #kc-info / #kc-info-wrapper
-                         de proposito: herdam do login.css do KC um fundo cinza + margens
-                         negativas que quebram o alinhamento. -->
+                    <#-- Sem os ids #kc-info / #kc-info-wrapper de proposito: no login.css do KC
+                         eles trazem fundo cinza + margens negativas que quebram o alinhamento. -->
                     <#if displayInfo>
                         <div class="app-form__subhead">
                             <#nested "info">
@@ -174,9 +189,8 @@
                 <div id="kc-content">
                     <div id="kc-content-wrapper">
 
-                        <#-- Social no topo + divisor "ou". O divisor depende do CSS
-                             :has(#kc-social-providers) p/ nao aparecer solto em paginas
-                             sem social (ex.: OTP). -->
+                        <#-- O divisor "ou" depende do CSS :not(:has(#kc-social-providers))
+                             p/ nao sobrar solto em paginas sem social (ex.: OTP). -->
                         <#nested "socialProviders">
 
                         <#if social?? && social.providers?has_content>
@@ -195,12 +209,22 @@
                             </form>
                         </#if>
 
+                        <#if switchOrganizationEnabled?? && switchOrganizationEnabled>
+                            <form id="kc-switch-organization-form" action="${url.loginAction}" method="post">
+                                <div class="${properties.kcFormGroupClass!}">
+                                    <input type="hidden" name="switchOrganization" value="true"/>
+                                    <a href="#" id="switch-organization"
+                                       onclick="document.forms['kc-switch-organization-form'].requestSubmit();return false;">${msg("doSwitchOrganization")}</a>
+                                </div>
+                            </form>
+                        </#if>
+
                     </div>
                 </div>
 
             </div>
 
-            <#-- Rodape abaixo do form (mobile, quando a aside some) -->
+            <#-- Rodape do mobile: o CSS so o mostra <=860px, quando a aside some. -->
             <footer class="app-footer--form">
                 <@appLegalFooter/>
                 <@loginFooter.content/>
@@ -209,8 +233,7 @@
     </main>
 </div>
 
-<#-- ============ Toast / Snackbar ============
-     Mensagem GLOBAL do KC (server-rendered); erros de campo viram toast via toast.js. -->
+<div class="app-toasts" id="app-toasts">
 <#if displayMessage && message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
     <div class="app-toast app-toast--${message.type}" id="app-toast" role="alert" aria-live="assertive" data-autohide="6000">
         <span class="app-toast__icon" aria-hidden="true"></span>
@@ -218,7 +241,7 @@
         <button type="button" class="app-toast__close" aria-label="${msg('appClose')}">&times;</button>
     </div>
 </#if>
-<#-- Logica do toast (fechar/auto-hide + erro de campo) em resources/js/toast.js. -->
+</div>
 </body>
 </html>
 </#macro>

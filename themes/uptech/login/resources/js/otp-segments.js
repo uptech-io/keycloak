@@ -1,13 +1,10 @@
 /*
- * Uptech SSO — OTP segmentado (caixas por digito)
- * Progressive enhancement: transforma o campo unico #otp (login-otp.ftl) em N
- * caixas de 1 digito. O valor e remontado no proprio #otp, que continua sendo o
- * campo enviado ao Keycloak. Sem JS, o #otp aparece normal (fallback gracioso).
- * Carregado como script externo (o CSP do KC bloqueia <script> inline).
- *
- * Recursos: auto-avanco ao digitar, backspace volta uma caixa, setas navegam,
- * colar distribui os digitos, estado de erro espelhado de aria-invalid e
- * auto-envio do formulario ao completar todos os digitos.
+ * Uptech SSO — OTP segmentado (script externo; theme.properties `scripts=`).
+ * Progressive enhancement sobre o #otp de login-otp.ftl: N caixas de 1 digito
+ * espelham o valor de volta no #otp, que continua sendo o campo enviado ao
+ * Keycloak. Sem JS o #otp funciona normalmente.
+ * N vem de data-otp-length no #otp; nenhum template emite esse atributo, entao
+ * na pratica sao sempre 6.
  */
 (function () {
     "use strict";
@@ -26,7 +23,8 @@
         var len = parseInt(otp.getAttribute("data-otp-length") || "6", 10);
         if (!(len > 0)) len = 6;
 
-        // As caixas passam a ser os controles; #otp vira espelho oculto/submetivel.
+        // style.css: esconde o label[for=otp] (mas ele precisa seguir no DOM: vira o
+        // aria-label das caixas) e esconde o #otp quando o form tem data-otp-enhanced.
         var labelEl = form.querySelector('label[for="otp"]');
         var groupLabel = (labelEl && labelEl.textContent.trim()) || "Codigo";
         var invalid = otp.getAttribute("aria-invalid") === "true";
@@ -61,8 +59,8 @@
             otp.value = boxes.map(function (b) { return b.value; }).join("");
         }
 
-        // Envia o form assim que todos os digitos estiverem preenchidos.
-        // Clica no botao real (preserva o onsubmit do KC) e trava p/ nao enviar 2x.
+        // Clica no #kc-login em vez de form.submit() p/ preservar o onsubmit do KC
+        // (login.disabled = true). O flag trava o envio duplo.
         var submitted = false;
         function maybeSubmit() {
             if (submitted || otp.value.length < len) return;
@@ -88,7 +86,7 @@
             boxes[i].select();
         }
 
-        // Distribui uma sequencia de digitos a partir de startAt; retorna a proxima vaga.
+        // Retorna a proxima vaga (pode ser boxes.length; focusBox clampa).
         function fill(str, startAt) {
             var ds = onlyDigits(str);
             var i = startAt || 0;
@@ -108,7 +106,7 @@
                     sync();
                     if (d.length === 1 && idx < boxes.length - 1) focusBox(idx + 1);
                 } else {
-                    // teclado/autofill jogou varios digitos de uma vez
+                    // maxlength=1 nao segura autofill/IME: chegam varios digitos de uma vez
                     focusBox(fill(d, idx));
                 }
                 maybeSubmit();
@@ -147,7 +145,9 @@
             b.addEventListener("focus", function () { b.select(); });
         });
 
-        if (otp.value) fill(otp.value, 0);          // valor pre-existente (raro)
+        // Valor pre-existente so por restauracao do navegador (voltar/bfcache);
+        // o template nunca preenche #otp.
+        if (otp.value) fill(otp.value, 0);
         focusBox(0);
     }
 

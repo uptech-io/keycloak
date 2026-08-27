@@ -1,8 +1,10 @@
 <#-- Wrapper branded dos e-mails Uptech (override de base/email/html/template.ftl).
-     Estiliza TODOS os e-mails: cabecalho com o nome do realm, card de conteudo e
-     rodape. HTML email-safe (tabelas + estilos inline; fontes do sistema, pois
-     clientes de e-mail nao carregam fontes web). Helpers: h1, p, button, code. -->
-<#assign fontStack = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif">
+     Estiliza TODOS os e-mails: cabecalho com a logo/nome do realm, card de conteudo
+     e rodape. HTML email-safe (tabelas + estilos inline). Fontes: Manrope (texto) e
+     JetBrains Mono (codigo) via Google Fonts nos clientes que carregam web fonts
+     (Apple Mail, iOS); os demais caem no stack do sistema. Helpers: h1, p, button, code. -->
+<#assign fontStack = "'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif">
+<#assign monoStack = "'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace">
 <#assign brand = (realmName!'')?has_content?then(realmName, properties.appBrandName!'Uptech')>
 
 <#macro emailLayout>
@@ -14,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light only" />
     <title>${brand}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&amp;family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
 </head>
 <body style="margin:0; padding:0; background:#F5F7FA; -webkit-font-smoothing:antialiased;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F7FA;">
@@ -22,8 +25,7 @@
 
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background:#ffffff; border:1px solid #EEF2F6; border-radius:8px; overflow:hidden; font-family:${fontStack};">
 
-                    <#-- Cabecalho: apenas a logo. Sem logo (appLogoUrl vazio), cai p/
-                         o nome do realm como texto, p/ o cabecalho nao ficar vazio. -->
+                    <#-- Cabecalho -->
                     <tr>
                         <td style="background:#07111F; padding:24px 32px; text-align:center;">
                             <#if (properties.appLogoUrl!'')?has_content>
@@ -46,9 +48,9 @@
                         <td style="padding:22px 32px; background:#F5F7FA; border-top:1px solid #EEF2F6; text-align:center; color:#667085; font-size:12px; line-height:1.7; font-family:${fontStack};">
                             <div>&copy; ${.now?string('yyyy')} ${(properties.appBrandName!'Uptech')?upper_case}. ${msg("appRights")}</div>
                             <div style="margin-top:2px;">
-                                <a href="${properties.appPrivacyUrl!'#'}" style="color:#667085; text-decoration:none;">${msg("appPrivacyPolicy")}</a>
+                                <a href="${(properties.appPrivacyUrl!'')?has_content?then(properties.appPrivacyUrl, '#')}" style="color:#667085; text-decoration:none;">${msg("appPrivacyPolicy")}</a>
                                 <span style="color:#D0D5DD;">&nbsp;|&nbsp;</span>
-                                <a href="${properties.appTermsUrl!'#'}" style="color:#667085; text-decoration:none;">${msg("appTermsPolicy")}</a>
+                                <a href="${(properties.appTermsUrl!'')?has_content?then(properties.appTermsUrl, '#')}" style="color:#667085; text-decoration:none;">${msg("appTermsPolicy")}</a>
                             </div>
                         </td>
                     </tr>
@@ -64,17 +66,15 @@
 </html>
 </#macro>
 
-<#-- Titulo principal do corpo -->
 <#macro h1>
 <h1 style="margin:0 0 16px; font-size:20px; line-height:1.4; color:#07111F; font-weight:700; font-family:${fontStack};"><#nested></h1>
 </#macro>
 
-<#-- Paragrafo (muted=true para textos secundarios) -->
 <#macro p muted=false>
 <p style="margin:0 0 14px; font-size:${muted?then('13','15')}px; line-height:1.62; color:${muted?then('#667085','#344054')}; font-family:${fontStack};"><#nested></p>
 </#macro>
 
-<#-- Botao CTA centralizado (bulletproof: tabela full-width + cell central) -->
+<#-- CTA "bulletproof": o fundo vem do <td> porque o Outlook ignora padding/fundo em <a>. -->
 <#macro button href label>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;">
     <tr>
@@ -91,9 +91,8 @@
 </table>
 </#macro>
 
-<#-- Codigo de verificacao em destaque -->
 <#macro code value>
 <div style="margin:24px 0; text-align:center;">
-    <span style="display:inline-block; padding:14px 26px; font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; font-size:30px; font-weight:700; letter-spacing:.28em; color:#07111F; background:#F5F7FA; border:1px solid #EEF2F6; border-radius:8px;">${value}</span>
+    <span style="display:inline-block; padding:14px 26px; font-family:${monoStack}; font-size:30px; font-weight:700; letter-spacing:.28em; color:#07111F; background:#F5F7FA; border:1px solid #EEF2F6; border-radius:8px;">${value}</span>
 </div>
 </#macro>
