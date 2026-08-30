@@ -170,10 +170,9 @@ body.app-body {
     gap: 20px;
 }
 
-/* Monograma acima do titulo do formulario: so no mobile (<=860px), quando o
-   painel escuro com a logo some; no desktop fica oculto. */
+/* Monograma (logo-single.png) centralizado acima do titulo do formulario. */
 .app-form__logo {
-    display: none;
+    display: block;
     height: 78px;
     width: auto;
     margin: 0 auto 26px;
@@ -627,6 +626,12 @@ a#switch-organization:hover {
     margin-top: 24px;
 }
 
+/* Botoes empilhados (ex.: Enviar + Cancelar nas acoes iniciadas pelo app, como
+   UPDATE_PASSWORD): os dois sao width 100%, entao so falta o respiro entre eles. */
+#kc-form-buttons .pf-c-button + .pf-c-button {
+    margin-top: 10px;
+}
+
 .pf-c-button.pf-m-primary,
 input.pf-c-button.pf-m-primary,
 .pf-c-button.pf-m-primary.pf-m-block {
@@ -1037,9 +1042,6 @@ html[lang="es"] #kc-totp-supported-apps::after {
     .app-footer--form {
         display: block;
         margin-top: 4px;
-    }
-    .app-form__logo {
-        display: block;
     }
     .app-main {
         padding: 40px 18px;

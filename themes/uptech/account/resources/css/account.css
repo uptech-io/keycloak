@@ -1,0 +1,146 @@
+/* Uptech SSO - console da conta (keycloak.v3, PatternFly 5).
+   Sem markup proprio: a marca entra sobrescrevendo variaveis --pf-v5-* que o
+   PatternFly ja consome. Cores espelham os tokens do login (style.css). */
+
+/* Fontes: reaproveita os woff2 do tema de login. resourceUrl deste tema e
+   /resources/<tag>/account/uptech, logo ../../../login/uptech/ cai no login. */
+@font-face {
+    font-family: "Manrope";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url("../../../login/uptech/fonts/manrope-latin-variable.woff2") format("woff2-variations"),
+        url("../../../login/uptech/fonts/manrope-latin-variable.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 800;
+    src: url("../../../login/uptech/fonts/jetbrains-mono-latin-variable.woff2") format("woff2-variations"),
+        url("../../../login/uptech/fonts/jetbrains-mono-latin-variable.woff2") format("woff2");
+}
+
+/* html:root (0,1,1) vence o :root (0,1,0) do PatternFly mesmo quando o app
+   injeta o CSS dele depois do nosso. */
+html:root {
+    --app-primary: #07111F;
+    --app-primary-hover: #101828;
+    --app-ink: #07111F;
+    --app-text: #344054;
+    --app-muted: #667085;
+    --app-border: #EEF2F6;
+    --app-border-strong: #D0D5DD;
+    --app-bg: #F5F7FA;
+
+    /* Tipografia */
+    --pf-v5-global--FontFamily--text: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --pf-v5-global--FontFamily--heading: var(--pf-v5-global--FontFamily--text);
+    --pf-v5-global--FontFamily--sans-serif: var(--pf-v5-global--FontFamily--text);
+    --pf-v5-global--FontFamily--monospace: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Cor primaria (botoes, links, foco, selecao) */
+    --pf-v5-global--primary-color--100: var(--app-primary);
+    --pf-v5-global--primary-color--200: var(--app-primary-hover);
+    --pf-v5-global--primary-color--light-100: var(--app-primary);
+    --pf-v5-global--active-color--100: var(--app-primary);
+    --pf-v5-global--active-color--400: var(--app-primary);
+    --pf-v5-global--link--Color: var(--app-primary);
+    --pf-v5-global--link--Color--hover: var(--app-primary-hover);
+    --pf-v5-global--Color--100: var(--app-ink);
+    --pf-v5-global--Color--200: var(--app-muted);
+    --pf-v5-global--BorderColor--100: var(--app-border-strong);
+    --pf-v5-global--BackgroundColor--200: var(--app-bg);
+    --pf-v5-global--BorderRadius--sm: 4px;
+}
+
+/* Cabecalho: navy da marca, logo branca (idm.png) */
+.pf-v5-c-masthead {
+    --pf-v5-c-masthead--BackgroundColor: var(--app-primary);
+    --pf-v5-c-masthead--PaddingLeft: 24px;
+    --pf-v5-c-masthead--PaddingRight: 24px;
+}
+
+.pf-v5-c-masthead .pf-v5-c-brand,
+.pf-v5-c-masthead__brand img {
+    height: 36px;
+    width: auto;
+}
+
+/* Menu lateral claro, com o item atual marcado na cor da marca */
+.pf-v5-c-page__sidebar {
+    --pf-v5-c-page__sidebar--BackgroundColor: #fff;
+    --pf-v5-c-page__sidebar--BoxShadow: none;
+    border-right: 1px solid var(--app-border);
+}
+
+.pf-v5-c-page__sidebar .pf-v5-c-nav {
+    --pf-v5-c-nav__link--Color: var(--app-text);
+    --pf-v5-c-nav__link--hover--Color: var(--app-ink);
+    --pf-v5-c-nav__link--hover--BackgroundColor: var(--app-bg);
+    --pf-v5-c-nav__link--focus--Color: var(--app-ink);
+    --pf-v5-c-nav__link--focus--BackgroundColor: var(--app-bg);
+    --pf-v5-c-nav__link--active--Color: var(--app-ink);
+    --pf-v5-c-nav__link--active--BackgroundColor: var(--app-bg);
+    --pf-v5-c-nav__link--m-current--Color: var(--app-ink);
+    --pf-v5-c-nav__link--m-current--BackgroundColor: var(--app-bg);
+    --pf-v5-c-nav__link--m-current--after--BorderColor: var(--app-primary);
+    --pf-v5-c-nav__link--after--BorderColor: transparent;
+    --pf-v5-c-nav__section-title--Color: var(--app-muted);
+    --pf-v5-c-nav__item--m-expanded__toggle--Color: var(--app-ink);
+    --pf-v5-c-nav__toggle--Color: var(--app-muted);
+}
+
+/* Conteudo: fundo cinza claro, cards brancos com borda sutil */
+.pf-v5-c-page__main-section {
+    --pf-v5-c-page__main-section--BackgroundColor: var(--app-bg);
+}
+
+.pf-v5-c-card {
+    --pf-v5-c-card--BoxShadow: none;
+    border: 1px solid var(--app-border);
+}
+
+/* Botoes na mesma proporcao do login */
+.pf-v5-c-button {
+    --pf-v5-c-button--BorderRadius: 4px;
+    font-weight: 600;
+}
+
+.pf-v5-c-button.pf-m-primary {
+    --pf-v5-c-button--m-primary--BackgroundColor: var(--app-primary);
+    --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--app-primary-hover);
+    --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--app-primary-hover);
+    --pf-v5-c-button--m-primary--active--BackgroundColor: var(--app-primary-hover);
+}
+
+.pf-v5-c-button.pf-m-link {
+    --pf-v5-c-button--m-link--Color: var(--app-primary);
+    --pf-v5-c-button--m-link--hover--Color: var(--app-primary-hover);
+    --pf-v5-c-button--m-link--focus--Color: var(--app-primary-hover);
+    --pf-v5-c-button--m-link--active--Color: var(--app-primary-hover);
+}
+
+a:not(.pf-v5-c-button):not(.pf-v5-c-nav__link) {
+    color: var(--app-primary);
+}
+
+.pf-v5-c-button.pf-m-secondary {
+    --pf-v5-c-button--m-secondary--Color: var(--app-ink);
+    --pf-v5-c-button--m-secondary--BorderColor: var(--app-border-strong);
+    --pf-v5-c-button--m-secondary--hover--Color: var(--app-ink);
+    --pf-v5-c-button--m-secondary--hover--BorderColor: var(--app-ink);
+}
+
+.pf-v5-c-form-control {
+    --pf-v5-c-form-control--BorderRadius: 4px;
+    --pf-v5-c-form-control--after--BorderBottomColor: var(--app-border-strong);
+    --pf-v5-c-form-control--hover--after--BorderBottomColor: var(--app-primary);
+    --pf-v5-c-form-control--focus--after--BorderBottomColor: var(--app-primary);
+}
+
+/* Tela de carregamento do index.ftl */
+.keycloak__loading-container {
+    font-family: var(--pf-v5-global--FontFamily--text);
+}

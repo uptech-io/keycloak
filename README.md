@@ -25,10 +25,13 @@ themes/uptech/
 │   ├── template.ftl · login-otp.ftl · theme.properties
 │   ├── messages/            # textos em pt_BR, en e es
 │   └── resources/           # css, js, fontes (Manrope e JetBrains Mono) e imagens
-└── email/                   # e-mails
-    ├── html/                # wrapper comum + os quatro e-mails principais
-    ├── messages/            # assuntos e textos em pt_BR, en e es
-    └── theme.properties
+├── email/                   # e-mails
+│   ├── html/                # wrapper comum + os quatro e-mails principais
+│   ├── messages/            # assuntos e textos em pt_BR, en e es
+│   └── theme.properties
+└── account/                 # console "Minha conta" (só CSS + logo sobre o keycloak.v3)
+    ├── theme.properties
+    └── resources/           # css/account.css, img
 Dockerfile · build.sh        # imagem de produção
 CLAUDE.md                    # arquitetura interna (templates, acoplamentos entre CSS e JS)
 ```
@@ -48,7 +51,7 @@ docker container run --rm -it \
 
 Depois, no Admin Console (<http://localhost:8082>):
 
-1. Em **Realm settings → Themes**, selecione `uptech` em *Login theme* e em *Email theme*.
+1. Em **Realm settings → Themes**, selecione `uptech` em *Login theme*, *Account theme* e *Email theme*.
 2. Em **Realm settings → Localization**, habilite *Internationalization*, adicione
    **pt-BR, en e es** em *Supported locales* e defina **pt-BR** como *Default locale*.
    Sem isso, o Keycloak renderiza todas as telas em inglês.
@@ -87,7 +90,7 @@ versão é o `FROM` do `Dockerfile`.
 | O quê | Onde |
 |---|---|
 | Logo (painel escuro e e-mails) | `login/resources/img/idm.png` — versão branca, exibida sobre fundo escuro; nos e-mails sai com 80 px de altura |
-| Monograma acima do título do formulário (só no mobile, ≤ 860 px) | `login/resources/img/logo-single.png` (escuro, 78 px de altura, centralizado) |
+| Monograma acima do título do formulário | `login/resources/img/logo-single.png` (escuro, 78 px de altura, centralizado) |
 | URL da logo nos e-mails | `email/theme.properties` → `appLogoUrl` (veja a seção **E-mails**) |
 | Favicon | `login/resources/img/favicon.ico` |
 | Cores, fontes e raio das bordas | tokens `--app-*` e `--font-*` no bloco `:root` de `login/resources/css/style.css` |
@@ -141,6 +144,15 @@ e produção. Depois de um upgrade, copie o valor de uma URL real da produção;
 algo imune a upgrades, hospede a logo em um endereço estável e informe-o em `APP_LOGO_URL`. Com `appLogoUrl` vazio, o
 cabeçalho mostra em texto o *Display name* do realm (ou `appBrandName`, se ele estiver
 vazio).
+
+## Console da conta
+
+O console "Minha conta" é uma aplicação React do próprio Keycloak (`keycloak.v3`); não há
+template para sobrescrever. O tema `account/` só troca o que o Keycloak permite: logo e
+link do cabeçalho, favicon, título e um CSS carregado depois do PatternFly, que aplica a
+marca por variáveis `--pf-v5-*` (cores, fontes, cabeçalho navy, menu lateral claro). O
+modo escuro automático fica desligado (`darkMode=false`) para manter a marca clara. As
+fontes são as mesmas do login, referenciadas por caminho relativo — não há cópia.
 
 ## Upgrade do Keycloak
 
