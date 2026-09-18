@@ -1,5 +1,5 @@
 /*
- * Uptech SSO — OTP segmentado (script externo; theme.properties `scripts=`).
+ * SSO — OTP segmentado (script externo; theme.properties `scripts=`).
  * Progressive enhancement sobre o #otp de login-otp.ftl: N caixas de 1 digito
  * espelham o valor de volta no #otp, que continua sendo o campo enviado ao
  * Keycloak. Sem JS o #otp funciona normalmente.

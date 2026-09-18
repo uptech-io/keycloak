@@ -1,0 +1,10 @@
+/* Tokens de marca do console da conta. Espelham os do login
+   (login/resources/css/brand.css) em hex literal, porque a paleta crua do
+   style.css nao e carregada aqui. Uma marca filha sobrescreve SO este arquivo,
+   em account/resources/css/brand.css, declarando os tres tokens. html:root pela
+   mesma razao do account.css (vence o :root do PatternFly). Valores da casa. */
+html:root {
+    --app-primary: #07111F;
+    --app-primary-hover: #101828;
+    --app-ink: #07111F;
+}

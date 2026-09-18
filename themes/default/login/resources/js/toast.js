@@ -1,5 +1,5 @@
 /*
- * Uptech SSO — Toast / Snackbar (script externo; theme.properties `scripts=`).
+ * SSO — Toast / Snackbar (script externo; theme.properties `scripts=`).
  * Poe html.js na carga: so com JS o style.css esconde os erros de campo inline
  * (sem JS eles ficam visiveis, como no base).
  * Com #app-toast no HTML (mensagem global do KC), so liga fechar + auto-hide.

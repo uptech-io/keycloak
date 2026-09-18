@@ -1,16 +1,18 @@
-/* Uptech SSO - console da conta (keycloak.v3, PatternFly 5).
+/* Console da conta (keycloak.v3, PatternFly 5).
    Sem markup proprio: a marca entra sobrescrevendo variaveis --pf-v5-* que o
-   PatternFly ja consome. Cores espelham os tokens do login (style.css). */
+   PatternFly ja consome. Cores de marca (--app-primary, --app-primary-hover,
+   --app-ink) vem do css/brand.css; os neutros espelham o style.css do login. */
 
 /* Fontes: reaproveita os woff2 do tema de login. resourceUrl deste tema e
-   /resources/<tag>/account/uptech, logo ../../../login/uptech/ cai no login. */
+   /resources/<tag>/account/<marca>; o caminho aponta para o tema-mae (default),
+   dono dos arquivos, independente da marca selecionada. */
 @font-face {
     font-family: "Manrope";
     font-style: normal;
     font-display: swap;
     font-weight: 200 800;
-    src: url("../../../login/uptech/fonts/manrope-latin-variable.woff2") format("woff2-variations"),
-        url("../../../login/uptech/fonts/manrope-latin-variable.woff2") format("woff2");
+    src: url("../../../login/default/fonts/manrope-latin-variable.woff2") format("woff2-variations"),
+        url("../../../login/default/fonts/manrope-latin-variable.woff2") format("woff2");
 }
 
 @font-face {
@@ -18,16 +20,13 @@
     font-style: normal;
     font-display: swap;
     font-weight: 100 800;
-    src: url("../../../login/uptech/fonts/jetbrains-mono-latin-variable.woff2") format("woff2-variations"),
-        url("../../../login/uptech/fonts/jetbrains-mono-latin-variable.woff2") format("woff2");
+    src: url("../../../login/default/fonts/jetbrains-mono-latin-variable.woff2") format("woff2-variations"),
+        url("../../../login/default/fonts/jetbrains-mono-latin-variable.woff2") format("woff2");
 }
 
 /* html:root (0,1,1) vence o :root (0,1,0) do PatternFly mesmo quando o app
    injeta o CSS dele depois do nosso. */
 html:root {
-    --app-primary: #07111F;
-    --app-primary-hover: #101828;
-    --app-ink: #07111F;
     --app-text: #344054;
     --app-muted: #667085;
     --app-border: #EEF2F6;
@@ -55,7 +54,7 @@ html:root {
     --pf-v5-global--BorderRadius--sm: 4px;
 }
 
-/* Cabecalho: navy da marca, logo branca (idm.png) */
+/* Cabecalho: --app-primary da marca, logo branca (idm.png do produto) */
 .pf-v5-c-masthead {
     --pf-v5-c-masthead--BackgroundColor: var(--app-primary);
     --pf-v5-c-masthead--PaddingLeft: 24px;

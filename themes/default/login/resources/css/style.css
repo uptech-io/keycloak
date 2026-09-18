@@ -61,20 +61,15 @@
     --grey-900: #07111F;
     --black: #000000;
     --white: #FFFFFF;
-    --app-primary: var(--grey-900);
-    --app-primary-hover: var(--grey-800);
-    --app-accent: var(--grey-900);
-    --app-ink: var(--grey-900);
+    /* Tokens de marca (--app-primary, --app-accent, --app-ink, --app-aside-*,
+       --app-ring, --app-shadow*) vivem em css/brand.css, que cada marca sobrescreve. */
     --app-text: var(--grey-700);
     --app-muted: var(--grey-500);
     --app-border: var(--grey-200);
     --app-border-strong: var(--grey-300);
     --app-bg: var(--grey-100);
-    --app-card: var(--white);
     --app-radius: 4px;
     --app-radius-sm: 4px;
-    --app-shadow: 0 18px 48px rgba(7, 17, 31, .10), 0 4px 12px rgba(7, 17, 31, .06);
-    --app-ring: 0 0 0 3px rgba(7, 17, 31, .18);
     --font-primary: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, sans-serif;
     --font-secondary: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -119,7 +114,7 @@ body.app-body {
     align-items: center;
     justify-content: center;
     padding: 64px clamp(40px, 6vw, 104px);
-    background: var(--grey-900);
+    background: var(--app-aside-bg);
     border-right: 1px solid var(--grey-100);
     overflow: hidden;
 }
@@ -148,8 +143,24 @@ body.app-body {
     color: var(--grey-300);
 }
 
+/* Entrada suave da logo e do slogan, uma vez, ao carregar (fill both: ficam
+   invisiveis durante o atraso). Desligada em prefers-reduced-motion, abaixo. */
+.app-aside__logo,
+.app-aside__title {
+    animation: app-rise .45s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.app-aside__title {
+    animation-delay: .08s;
+}
+
+@keyframes app-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .app-aside__accent {
-    color: var(--secondary-main);
+    color: var(--app-aside-accent);
 }
 
 
@@ -199,7 +210,7 @@ body.app-body {
 }
 
 .app-form__subhead a {
-    color: var(--app-primary);
+    color: var(--app-accent);
     font-weight: 600;
     text-decoration: none;
 }
@@ -639,7 +650,7 @@ input.pf-c-button.pf-m-primary,
     height: 48px;
     font-size: 15px;
     letter-spacing: .01em;
-    color: #fff;
+    color: var(--app-primary-contrast);
     background: var(--app-primary);
     transition: background .15s ease, box-shadow .15s ease, transform .04s ease;
 }
@@ -651,7 +662,7 @@ input.pf-c-button.pf-m-primary,
 
 .pf-c-button.pf-m-primary:focus-visible {
     outline: none;
-    box-shadow: var(--app-ring), 0 6px 16px rgba(7, 17, 31, .24);
+    box-shadow: var(--app-ring), var(--app-shadow-strong);
 }
 
 .pf-c-button.pf-m-primary:active {
@@ -771,15 +782,15 @@ ul.pf-c-dropdown__menu,
 }
 
 .app-footer--aside .app-footer__legal {
-    color: rgba(255,255,255,0.6);
+    color: var(--app-aside-muted);
 }
 
 .app-footer--aside .app-footer__legal a {
-    color: rgba(255,255,255,0.6);
+    color: var(--app-aside-muted);
 }
 
 .app-footer--aside .app-footer__legal a::before {
-    color: var(--grey-600);
+    color: var(--app-aside-rule);
 }
 
 .app-footer--form {
@@ -824,7 +835,7 @@ ul.pf-c-dropdown__menu,
     gap: 10px;
     padding: 13px 14px;
     border-radius: var(--app-radius-sm);
-    box-shadow: 0 8px 24px rgba(7, 17, 31, .22), 0 2px 6px rgba(7, 17, 31, .12);
+    box-shadow: var(--app-shadow-toast);
     color: #fff;
     font-size: 14px;
     line-height: 1.45;
@@ -849,7 +860,9 @@ ul.pf-c-dropdown__menu,
 .app-toast--success { background: var(--success-main); }
 .app-toast--warning { background: var(--warning-main); color: var(--grey-900); }
 
-.app-toast--info    { background: var(--app-primary); }
+/* info em --app-ink, nao em --app-primary: com uma primaria laranja (upchip) o
+   toast info ficaria igual ao de aviso (--warning-main) */
+.app-toast--info    { background: var(--app-ink); }
 
 .app-toast__icon {
     flex: 0 0 auto;
@@ -1071,7 +1084,9 @@ html[lang="es"] #kc-totp-supported-apps::after {
         transition: none !important;
     }
     .app-toast,
-    .app-toast--hiding {
+    .app-toast--hiding,
+    .app-aside__logo,
+    .app-aside__title {
         animation: none !important;
     }
 }
@@ -1291,7 +1306,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
 
 [data-page-id="login-select-authenticator"] .select-auth-box-parent:focus-visible {
     outline: none;
-    border-color: var(--app-ink);
+    border-color: var(--app-accent);
     box-shadow: var(--app-ring);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Uptech SSO — botao "Entrar com chave de seguranca" (<input> em webauthn-authenticate,
+ * SSO — botao "Entrar com chave de seguranca" (<input> em webauthn-authenticate,
  * <a> no login com passkeys do 26.7). O fluxo WebAuthn e do base
  * (webauthnAuthenticate.js); aqui so o feedback: ao clicar, o botao entra em espera
  * (aria-busy + texto de body[data-passkey-waiting]) enquanto o navegador fala com a chave.

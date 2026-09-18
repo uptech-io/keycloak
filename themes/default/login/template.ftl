@@ -10,6 +10,14 @@
 </#macro>
 
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayRequiredFields=false>
+<#-- Modo do campo de usuario (cpf | cpf-or-email | email): vai no <body> para o
+     js/cpf-mask.js e escolhe a ajuda do "esqueci a senha" (abaixo). "Email as
+     username" manda: o username E o e-mail, mesmo que o rotulo do base ainda diga
+     username quando "Login with email" esta desligado. Sem ele: CPF puro quando
+     "Login with email" esta desligado ou nas telas do User Profile (cadastro, perfil,
+     revisao apos IdP), onde o campo e sempre o CPF; senao, CPF ou e-mail. -->
+<#assign appUsernameFormat = realm.registrationEmailAsUsername?then("email", (!realm.loginWithEmailAllowed || ["register", "login-update-profile", "idp-review-user-profile"]?seq_contains(pageId))?then("cpf", "cpf-or-email"))>
+<#assign appResetHelp = {"cpf": "appResetHelpCpf", "cpf-or-email": "appResetHelpCpfOrEmail", "email": "appResetHelpEmail"}>
 <!DOCTYPE html>
 <html lang="${lang}"<#if realm.internationalizationEnabled> dir="${(locale.rtl)?then('rtl','ltr')}"</#if>>
 
@@ -107,7 +115,7 @@
     </#if>
 </head>
 
-<body class="app-body" data-page-id="login-${pageId}" data-toast-close="${msg('appClose')}" data-passkey-waiting="${msg('appPasskeyWaiting')}">
+<body class="app-body" data-page-id="login-${pageId}" data-username-format="${appUsernameFormat}" data-toast-close="${msg('appClose')}" data-passkey-waiting="${msg('appPasskeyWaiting')}">
 <div class="app-login">
 
     <aside class="app-aside">
@@ -167,7 +175,9 @@
                         </#if>
                         <#nested "show-username">
                         <div id="kc-username" class="app-attempted-user ${properties.kcFormGroupClass!}">
-                            <label id="kc-attempted-username">${auth.attemptedUsername}</label>
+                            <#-- O username do produto e o CPF (11 digitos): mostra formatado; qualquer
+                                 outro valor (ex.: e-mail) passa intacto. Mascara do campo: js/cpf-mask.js -->
+                            <label id="kc-attempted-username">${(auth.attemptedUsername!'')?replace(r"^(\d{3})(\d{3})(\d{3})(\d{2})$", "$1.$2.$3-$4", "r")}</label>
                             <a id="reset-login" href="${url.loginRestartFlowUrl}" aria-label="${msg("restartLoginTooltip")}">
                                 <div class="kc-login-tooltip">
                                     <i class="${properties.kcResetFlowIcon!}"></i>
@@ -181,7 +191,13 @@
                          eles trazem fundo cinza + margens negativas que quebram o alinhamento. -->
                     <#if displayInfo>
                         <div class="app-form__subhead">
-                            <#nested "info">
+                            <#if pageId == "login-reset-password">
+                                <#-- O base escolhe emailInstruction/emailInstructionUsername so por
+                                     "Duplicate emails"; aqui a ajuda segue o modo do campo. -->
+                                ${msg(appResetHelp[appUsernameFormat])}
+                            <#else>
+                                <#nested "info">
+                            </#if>
                         </div>
                     </#if>
                 </header>
