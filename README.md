@@ -56,7 +56,7 @@ themes/
 ├── uptech/                  # marca Uptech: só theme.properties (cores e logo = casa)
 │   ├── login/ · email/ · account/
 └── upchip/                  # marca Upchip: theme.properties + css/brand.css (login e account)
-    ├── login/ · email/ · account/   # + img/ com o monograma e o favicon da marca
+    ├── login/ · email/ · account/   # + img/ com o monograma (logo dos e-mails) e o favicon
 Dockerfile · build.sh        # imagem de produção
 CLAUDE.md                    # arquitetura interna (templates, acoplamentos entre CSS e JS)
 ```
@@ -130,13 +130,12 @@ só precisa do que difere:
   propósito: uma chave esquecida no filho cai no fallback do template — que para
   `appBrandName` é literalmente `Uptech`, a casa — e nunca no `theme.properties` de outra
   marca; por isso confira as chaves de identidade de toda marca nova.
-- O **slogan, o globo e a logo são identidade do produto**, iguais em todas as marcas: o
-  slogan `appWelcomeTitle` e o globo do painel de marca, no login, e a logo `idm.png`, no
-  cabeçalho dos e-mails (via `appLogoUrl`, que a serve de `login/resources/img/idm.png` —
-  por isso o arquivo continua lá, embora o login não exiba logo) e no masthead do console
-  (`account/resources/img/idm.png`). Ficam no `default` e não devem ser sobrescritos. A marca entra nas cores (botão, links, painel e destaque do globo), nos
-  favicons, no nome e nos links. O monograma `login/resources/img/logo-single.png` deixou
-  de ser exibido: o layout não tem mais logo acima do título.
+- O **slogan e o globo são identidade do produto**, iguais em todas as marcas: o slogan
+  `appWelcomeTitle` e o globo do painel de marca, no login, ficam no `default` e não devem
+  ser sobrescritos. A marca entra nas cores (botão, links, painel e destaque do globo), no
+  monograma `login/resources/img/logo-single.png` — a logo do cabeçalho dos e-mails; o
+  login não exibe logo —, nos favicons, no nome e nos links. A antiga logo do produto
+  (`idm.png`) só resta no masthead do console da conta (`account/resources/img/idm.png`).
 
 ### Nova marca (ou completar a Upchip)
 
@@ -151,8 +150,9 @@ só precisa do que difere:
    `--app-aside-ink` (slogan e seletor de idioma) precisa de ≥ 4,5:1 sobre
    `--app-aside-bg`; `--app-aside-map` e `--app-aside-map-hi` são as cores dos pontos do
    globo (terra e Brasil).
-3. `login/resources/img/`: só o `favicon.ico`. **Não** entregar `idm.png`: é a logo do
-   produto.
+3. `login/resources/img/`: `logo-single.png` (monograma da marca com fundo transparente,
+   desenhado para fundo **claro**: é a logo do cabeçalho branco dos e-mails, exibida com
+   64 px de altura; sem ele a marca herdaria o monograma da casa) e `favicon.ico`.
 4. `email/theme.properties`: `parent=default`, as mesmas chaves de identidade, `appColorPrimary`
    / `appColorOnPrimary` e `appLogoUrl` (veja **E-mails**).
 5. `account/theme.properties` com `parent=default`, `account/resources/css/brand.css` (três
@@ -188,11 +188,12 @@ Caminhos relativos a `themes/default/`, salvo indicação.
 
 | O quê | Onde |
 |---|---|
-| Logo do produto (e-mails e masthead do console; o login não exibe logo) | `login/resources/img/idm.png` — é o arquivo que o `appLogoUrl` dos e-mails aponta (80 px de altura no cabeçalho); o masthead usa `account/resources/img/idm.png`. Versão branca, para fundo escuro. Padrão para todas as marcas |
+| Logo dos e-mails (monograma da marca; o login não exibe logo) | `login/resources/img/logo-single.png` no tema da marca — é o arquivo que o `appLogoUrl` aponta; vai sobre o cabeçalho **branco** dos e-mails, com 64 px de altura, então precisa funcionar em fundo claro |
+| Logo do masthead do console da conta | `account/resources/img/idm.png` (`logo=`), versão branca sobre a cor primária da marca. Padrão para todas as marcas |
 | Globo do painel de marca | `login/resources/js/globe.js` (canvas, pontos de terra embutidos) e `login/resources/img/globe.svg` (imagem estática sem JS); cores em `--app-aside-map` / `--app-aside-map-hi` do `brand.css` |
 | URL da logo nos e-mails | `email/theme.properties` **da marca** → `appLogoUrl` (veja a seção **E-mails**) |
 | Favicon do login | `login/resources/img/favicon.ico` no tema da marca (o do `default` é o da casa) |
-| Favicon do console da conta | `account/resources/img/favicon.ico` no tema da marca (`favIcon=/img/favicon.ico`, precisa começar com `/`); a logo do masthead, `account/resources/img/idm.png` (`logo=`), é a do produto |
+| Favicon do console da conta | `account/resources/img/favicon.ico` no tema da marca (`favIcon=/img/favicon.ico`, precisa começar com `/`) |
 | Cores da marca | `login/resources/css/brand.css` e `account/resources/css/brand.css` no tema da marca (login e console); `appColorPrimary` / `appColorOnPrimary` no `email/theme.properties` da marca (e-mails) |
 | Neutros, fontes, altura dos controles e raio das bordas | tokens `--app-*` e `--font-*` no bloco `:root` de `login/resources/css/style.css`. Os neutros do login são escuros e só valem no login; o console da conta (`account/resources/css/account.css`, `html:root`) e os e-mails (estilos inline de `email/html/template.ftl`) continuam claros, com neutros próprios que mudam juntos entre si |
 | Textos do login | `login/messages/`: painel lateral `appWelcomeTitle` (aceita HTML; slogan do produto, igual para todas as marcas); rodapé `appRights`, `appPrivacyPolicy`, `appTermsPolicy`; OTP `appOtpTitle`, `appOtpHelp`; chave de segurança `appPasskeyTitle`, `appPasskeyHelp`, `appPasskeyWaiting`; escolha de método `appChooseTitle`, `appChooseHelp` |
@@ -298,22 +299,27 @@ código de verificação. Cada um desses quatro também é enviado em texto puro
 das chaves `passwordResetBody`, `emailVerificationBody`, `executeActionsBody` e
 `emailVerificationBodyCode` — ao mudar um texto, mude as duas versões.
 
-A logo dos e-mails precisa de uma **URL pública e absoluta**, porque os clientes de
-e-mail não carregam arquivos do tema. Hoje ela é servida pelo próprio Keycloak, e cada
-marca informa a sua no `email/theme.properties` dela:
+O cabeçalho dos e-mails é branco, com uma barra fina na cor da marca (`appColorPrimary`)
+acima dele e o monograma da marca (`logo-single.png`) ao centro; por isso a imagem precisa
+funcionar sobre fundo claro. Ela precisa também de uma **URL pública e absoluta**, porque
+os clientes de e-mail não carregam arquivos do tema. Hoje é servida pelo próprio Keycloak,
+e cada marca informa a sua no `email/theme.properties` dela:
 
 ```
-appLogoUrl=${env.UPTECH_LOGO_URL,env.APP_LOGO_URL:https://sso.uptech.com.br/resources/<tag>/login/uptech/img/idm.png}
+appLogoUrl=${env.UPTECH_LOGO_URL,env.APP_LOGO_URL:https://sso.uptech.com.br/resources/<tag>/login/uptech/img/logo-single.png}
 ```
+
+Um deploy que ainda defina `UPTECH_LOGO_URL`/`APP_LOGO_URL` apontando para a antiga logo
+branca precisa trocar (ou remover) a variável: branco sobre o cabeçalho branco não aparece.
 
 O Keycloak passa os valores de `theme.properties` pelo `StringPropertyReplacer`: as
 variáveis de ambiente antes do primeiro `:` são tentadas na ordem (`UPTECH_LOGO_URL` e, como
 nome antigo ainda aceito, `APP_LOGO_URL` — migre os deploys para o novo); se nenhuma
 existir no container, vale a URL escrita após o `:` (os `:` e `/` da própria URL não
 atrapalham). A variável só existe para as marcas que declaram `appLogoUrl` assim; a
-`upchip` usa `UPCHIP_LOGO_URL` com a mesma logo do produto sob o caminho dela
-(`login/upchip/img/idm.png`). O caminho usa o nome da marca mesmo quando o arquivo mora no
-`default` — o Keycloak resolve recursos pela cadeia de herança.
+`upchip` usa `UPCHIP_LOGO_URL` e o monograma dela (`login/upchip/img/logo-single.png`). O
+caminho usa o nome da marca mesmo quando o arquivo mora no `default` (caso da Uptech) — o
+Keycloak resolve recursos pela cadeia de herança.
 
 O segmento `<tag>` é um identificador aleatório que o Keycloak gera para cada banco de
 dados a cada migração — ou seja, muda a cada upgrade e é diferente entre desenvolvimento

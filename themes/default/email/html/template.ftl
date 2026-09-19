@@ -3,8 +3,10 @@
      e rodape. HTML email-safe (tabelas + estilos inline). Fontes: Manrope (texto) e
      JetBrains Mono (codigo) via Google Fonts nos clientes que carregam web fonts
      (Apple Mail, iOS); os demais caem no stack do sistema. Helpers: h1, p, button, code.
-     Cores de marca: appColorPrimary (cabecalho, titulos, CTA, codigo) e appColorOnPrimary
-     (texto sobre ela) do theme.properties de cada marca; sem elas, valem as da casa. -->
+     Cores de marca: appColorPrimary (barra do topo, titulos, CTA, codigo) e
+     appColorOnPrimary (texto do CTA) do theme.properties de cada marca; sem elas, valem
+     as da casa. O cabecalho e BRANCO: a logo e o monograma da marca (logo-single.png),
+     desenhado para fundo claro; a cor da marca entra na barra fina acima dele. -->
 <#assign fontStack = "'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif">
 <#assign monoStack = "'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace">
 <#assign brand = (realmName!'')?has_content?then(realmName, properties.appBrandName!'Uptech')>
@@ -29,13 +31,18 @@
 
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background:#ffffff; border:1px solid #EEF2F6; border-radius:8px; overflow:hidden; font-family:${fontStack};">
 
-                    <#-- Cabecalho -->
+                    <#-- Barra na cor da marca (o <td> vazio precisa de height + font-size:0 no Outlook) -->
                     <tr>
-                        <td bgcolor="${colorPrimary}" style="background:${colorPrimary}; padding:24px 32px; text-align:center;">
+                        <td bgcolor="${colorPrimary}" height="4" style="background:${colorPrimary}; height:4px; line-height:4px; font-size:0;">&nbsp;</td>
+                    </tr>
+
+                    <#-- Cabecalho: monograma da marca sobre branco; sem appLogoUrl, o nome em texto -->
+                    <tr>
+                        <td bgcolor="#ffffff" style="background:#ffffff; padding:28px 32px 24px; text-align:center; border-bottom:1px solid #EEF2F6;">
                             <#if (properties.appLogoUrl!'')?has_content>
-                                <img src="${properties.appLogoUrl}" alt="${brand}" height="80" style="display:block; height:80px; width:auto; margin:0 auto; border:0; outline:none;" />
+                                <img src="${properties.appLogoUrl}" alt="${brand}" height="64" style="display:block; height:64px; width:auto; margin:0 auto; border:0; outline:none;" />
                             <#else>
-                                <span style="display:inline-block; color:${colorOnPrimary}; font-size:18px; font-weight:700; letter-spacing:.04em;">${brand}</span>
+                                <span style="display:inline-block; color:${colorPrimary}; font-size:18px; font-weight:700; letter-spacing:.04em;">${brand}</span>
                             </#if>
                         </td>
                     </tr>
