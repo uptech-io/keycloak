@@ -1,7 +1,8 @@
 /* Console da conta (keycloak.v3, PatternFly 5).
    Sem markup proprio: a marca entra sobrescrevendo variaveis --pf-v5-* que o
    PatternFly ja consome. Cores de marca (--app-primary, --app-primary-hover,
-   --app-ink) vem do css/brand.css; os neutros espelham o style.css do login. */
+   --app-ink) vem do css/brand.css. Os neutros sao claros e proprios do console
+   (espelhados so nos estilos inline dos e-mails); o login e escuro e nao os usa. */
 
 /* Fontes: reaproveita os woff2 do tema de login. resourceUrl deste tema e
    /resources/<tag>/account/<marca>; o caminho aponta para o tema-mae (default),

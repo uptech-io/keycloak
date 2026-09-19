@@ -1,8 +1,10 @@
-/* Tokens de marca do console da conta. Espelham os do login
-   (login/resources/css/brand.css) em hex literal, porque a paleta crua do
-   style.css nao e carregada aqui. Uma marca filha sobrescreve SO este arquivo,
-   em account/resources/css/brand.css, declarando os tres tokens. html:root pela
-   mesma razao do account.css (vence o :root do PatternFly). Valores da casa. */
+/* Tokens de marca do console da conta, em hex literal (a paleta crua do style.css
+   do login nao e carregada aqui). Sao INDEPENDENTES dos do login: o console e claro
+   e usa a cor primaria da marca (na casa, o navy #07111F) em masthead, botoes e
+   links; o login e escuro e tem tokens proprios (la a casa usa teal no botao).
+   Uma marca filha sobrescreve SO este arquivo, em account/resources/css/brand.css,
+   declarando os tres tokens. html:root pela mesma razao do account.css (vence o
+   :root do PatternFly). Valores da casa. */
 html:root {
     --app-primary: #07111F;
     --app-primary-hover: #101828;

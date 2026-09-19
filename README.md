@@ -13,11 +13,14 @@ Console.
 
 O que muda em relação ao tema padrão do Keycloak:
 
-- Login em duas colunas: painel escuro com logo e título à esquerda, formulário à
-  direita. A logo e o slogan do painel entram com um fade suave, desligado quando o
-  sistema pede movimento reduzido. Abaixo de 860 px o painel some e o rodapé passa para
-  baixo do formulário.
-- A mensagem do servidor aparece como *toast* no canto superior direito; quando não há
+- Login em duas colunas sobre superfície escura: formulário à esquerda, numa coluna
+  estreita ancorada no topo, sem logo, com o seletor de idioma no canto superior direito
+  da página; painel de marca à direita, só com o slogan sobre um
+  globo pontilhado que gira devagar (Brasil em destaque). O globo fica parado quando o
+  sistema pede movimento reduzido e vira uma imagem estática sem JavaScript. Abaixo de
+  860 px o painel some. O rodapé legal fica sempre abaixo do formulário.
+- A mensagem do servidor aparece como *toast* no canto superior direito (no celular, no
+  rodapé da janela, para não cobrir o título); quando não há
   mensagem do servidor, cada erro de validação vira um toast próprio, com o nome do campo,
   empilhados no mesmo canto. Sem JavaScript, os erros ficam inline, junto ao campo.
 - Código OTP em seis caixas, com avanço automático, colar, envio automático ao
@@ -29,7 +32,8 @@ O que muda em relação ao tema padrão do Keycloak:
   como o usuário fica guardado; no console da conta só o rótulo muda. Se o realm permitir
   login por e-mail, rótulo e máscara acompanham. Sem JavaScript o campo aceita os dígitos
   crus (veja **CPF como nome de usuário**).
-- Seletor de idioma oculto; o idioma vem do navegador ou do usuário (veja **Idiomas**).
+- Seletor de idioma no canto superior direito; sem escolha, o idioma vem do navegador ou
+  do usuário (veja **Idiomas**).
 - Telas de chave de segurança (WebAuthn/passkey) e de escolha do método de login com
   título próprio, cards e ícones do tema — o fluxo continua sendo o do Keycloak.
 - Todos os e-mails do Keycloak saem com cabeçalho, card e rodapé da marca.
@@ -126,26 +130,29 @@ só precisa do que difere:
   propósito: uma chave esquecida no filho cai no fallback do template — que para
   `appBrandName` é literalmente `Uptech`, a casa — e nunca no `theme.properties` de outra
   marca; por isso confira as chaves de identidade de toda marca nova.
-- O **painel lateral é identidade do produto**, igual em todas as marcas: a logo
-  `login/resources/img/idm.png` (também o cabeçalho dos e-mails, via `appLogoUrl`, e o
-  masthead do console, `account/resources/img/idm.png`) e o slogan `appWelcomeTitle` ficam
-  no `default` e não devem ser sobrescritos. A marca entra no monograma acima do
-  formulário (`login/resources/img/logo-single.png`), nos favicons, nas cores, no nome e
-  nos links.
+- O **slogan, o globo e a logo são identidade do produto**, iguais em todas as marcas: o
+  slogan `appWelcomeTitle` e o globo do painel de marca, no login, e a logo `idm.png`, no
+  cabeçalho dos e-mails (via `appLogoUrl`, que a serve de `login/resources/img/idm.png` —
+  por isso o arquivo continua lá, embora o login não exiba logo) e no masthead do console
+  (`account/resources/img/idm.png`). Ficam no `default` e não devem ser sobrescritos. A marca entra nas cores (botão, links, painel e destaque do globo), nos
+  favicons, no nome e nos links. O monograma `login/resources/img/logo-single.png` deixou
+  de ser exibido: o layout não tem mais logo acima do título.
 
 ### Nova marca (ou completar a Upchip)
 
 1. `login/theme.properties`: `parent=default`, `appBrandName`, `appPrivacyUrl`, `appTermsUrl`.
 2. `login/resources/css/brand.css`: copie o do `default` e troque os valores — todos os
-   tokens precisam existir (o `style.css` não tem fallback). Os `rgba()` de `--app-ring`,
-   `--app-shadow` e `--app-shadow-strong` usam o RGB de `--app-primary`; o de
-   `--app-shadow-toast` usa o de `--app-ink` (os toasts têm fundo de status); os alfas
-   podem ser ajustados, anotando o motivo. O painel lateral (`--app-aside-bg`) precisa ser
-   escuro o bastante para texto claro: a logo é forçada a branco e o título é `--grey-300`
-   (mire ≥ 4,5:1 com branco e ≥ 3:1 com `#D0D5DD`); o rodapé legal e o separador `|` dele
-   têm cor própria (`--app-aside-muted`, `--app-aside-rule`) para acompanhar o fundo.
-3. `login/resources/img/`: `logo-single.png` (monograma da marca sobre fundo branco, exibido
-   com 78 px de altura) e `favicon.ico`. **Não** entregar `idm.png`: é a logo do produto.
+   tokens precisam existir (o `style.css` não tem fallback). O formulário fica sobre a
+   superfície escura do `default` (`--app-surface`, `#111418`): `--app-accent` (links e
+   foco) e `--app-ink` (títulos) precisam de ≥ 4,5:1 sobre ela, e `--app-primary-contrast`
+   de ≥ 4,5:1 sobre `--app-primary`. Uma cor de marca escura demais para virar texto ganha
+   um tom mais claro do mesmo matiz em `--app-accent` (é o caso da UPchip). O `rgba()` de
+   `--app-ring` usa o RGB de `--app-accent`; as sombras são pretas. No painel de marca,
+   `--app-aside-ink` (slogan e seletor de idioma) precisa de ≥ 4,5:1 sobre
+   `--app-aside-bg`; `--app-aside-map` e `--app-aside-map-hi` são as cores dos pontos do
+   globo (terra e Brasil).
+3. `login/resources/img/`: só o `favicon.ico`. **Não** entregar `idm.png`: é a logo do
+   produto.
 4. `email/theme.properties`: `parent=default`, as mesmas chaves de identidade, `appColorPrimary`
    / `appColorOnPrimary` e `appLogoUrl` (veja **E-mails**).
 5. `account/theme.properties` com `parent=default`, `account/resources/css/brand.css` (três
@@ -157,20 +164,21 @@ só precisa do que difere:
 se a cor valer para e-mail, reflita em `appColorPrimary`/`appColorOnPrimary`. Conferência:
 `grep -o 'var(--app-[a-z-]*' themes/default/login/resources/css/style.css | sort -u | grep -v -- '--app-icon$'`
 contra as declarações de cada `brand.css` — a diferença deve ser só os neutros do `:root`
-do `style.css` (`--app-text`, `--app-muted`, `--app-border`, `--app-border-strong`,
-`--app-bg`, `--app-radius*`, `--app-font`); `--app-icon` é local, definido por cada
-`.app-icon--*`.
+do `style.css` (`--app-surface*`, `--app-text`, `--app-muted`, `--app-placeholder`,
+`--app-border*`, `--app-bg`, `--app-error-text`, `--app-toast-info`, `--app-control-h`,
+`--app-radius*`, `--app-font`); `--app-icon` é local, definido por cada `.app-icon--*`.
 
 A `upchip` segue o *Manual de Identidade Visual* (PDF na raiz do repositório). O laranja
 em uso é `#BD4B00`: o Pantone Orange 021 C `#FF6600` com o matiz mantido e ~25% menos
 luminosidade — decisão da marca, porque o `#FF6600` chapado ficou forte demais em tela; de
-quebra passa WCAG AA (5,0:1 com branco). Ele vale para tudo: botão, links, foco, painel
-lateral chapado, masthead do console, cabeçalho e CTA dos e-mails (hover `#A34100`). O
-amarelo 1235 C `#FFC200` fica no token `--app-aside-accent`, reservado para destacar uma
-palavra do `appWelcomeTitle` (`<span class="app-aside__accent">`) — hoje nenhuma mensagem
-usa essa marcação, então ele não aparece em tela; o losango da marca é o monograma e o favicon
-(recortado do render do manual em 600 dpi — troque pela arte vetorial se a agência
-fornecer). Só os links das políticas continuam vazios, marcados `PROVISORIO`. Para voltar
+quebra passa WCAG AA (5,0:1 com branco). Ele vale para o botão, o painel de marca chapado,
+o masthead do console, o cabeçalho e o CTA dos e-mails (hover `#A34100`). Como texto sobre
+a superfície escura do login ele daria só 3,6:1, então links e foco usam `#FF9752`, o
+mesmo matiz mais claro (8,7:1). O amarelo 1235 C `#FFC200` marca o Brasil no globo
+(`--app-aside-map-hi`) e fica também em `--app-aside-accent`, reservado para destacar uma
+palavra do `appWelcomeTitle` (`<span class="app-aside__accent">`), que hoje nenhuma
+mensagem usa. O losango da marca é o favicon (recortado do render do manual em 600 dpi —
+troque pela arte vetorial se a agência fornecer). Só os links das políticas continuam vazios, marcados `PROVISORIO`. Para voltar
 ao `#FF6600` oficial basta trocar os hex nos dois `brand.css` e em `appColorPrimary`
 (lembrando que branco sobre `#FF6600` tem só 2,9:1).
 
@@ -180,13 +188,13 @@ Caminhos relativos a `themes/default/`, salvo indicação.
 
 | O quê | Onde |
 |---|---|
-| Logo do produto (painel lateral, e-mails, masthead do console) | `login/resources/img/idm.png` — versão branca, exibida sobre fundo escuro; nos e-mails sai com 80 px de altura. Padrão para todas as marcas |
-| Monograma da marca acima do título do formulário | `login/resources/img/logo-single.png` no tema da marca (sobre branco, 78 px de altura, centralizado) |
+| Logo do produto (e-mails e masthead do console; o login não exibe logo) | `login/resources/img/idm.png` — é o arquivo que o `appLogoUrl` dos e-mails aponta (80 px de altura no cabeçalho); o masthead usa `account/resources/img/idm.png`. Versão branca, para fundo escuro. Padrão para todas as marcas |
+| Globo do painel de marca | `login/resources/js/globe.js` (canvas, pontos de terra embutidos) e `login/resources/img/globe.svg` (imagem estática sem JS); cores em `--app-aside-map` / `--app-aside-map-hi` do `brand.css` |
 | URL da logo nos e-mails | `email/theme.properties` **da marca** → `appLogoUrl` (veja a seção **E-mails**) |
 | Favicon do login | `login/resources/img/favicon.ico` no tema da marca (o do `default` é o da casa) |
 | Favicon do console da conta | `account/resources/img/favicon.ico` no tema da marca (`favIcon=/img/favicon.ico`, precisa começar com `/`); a logo do masthead, `account/resources/img/idm.png` (`logo=`), é a do produto |
 | Cores da marca | `login/resources/css/brand.css` e `account/resources/css/brand.css` no tema da marca (login e console); `appColorPrimary` / `appColorOnPrimary` no `email/theme.properties` da marca (e-mails) |
-| Neutros, fontes e raio das bordas | tokens `--app-*` e `--font-*` no bloco `:root` de `login/resources/css/style.css`; os neutros têm mais duas cópias em hex que mudam junto — `account/resources/css/account.css` (`html:root`) e os estilos inline de `email/html/template.ftl` |
+| Neutros, fontes, altura dos controles e raio das bordas | tokens `--app-*` e `--font-*` no bloco `:root` de `login/resources/css/style.css`. Os neutros do login são escuros e só valem no login; o console da conta (`account/resources/css/account.css`, `html:root`) e os e-mails (estilos inline de `email/html/template.ftl`) continuam claros, com neutros próprios que mudam juntos entre si |
 | Textos do login | `login/messages/`: painel lateral `appWelcomeTitle` (aceita HTML; slogan do produto, igual para todas as marcas); rodapé `appRights`, `appPrivacyPolicy`, `appTermsPolicy`; OTP `appOtpTitle`, `appOtpHelp`; chave de segurança `appPasskeyTitle`, `appPasskeyHelp`, `appPasskeyWaiting`; escolha de método `appChooseTitle`, `appChooseHelp` |
 | Textos dos e-mails | `email/messages/`: assuntos `*Subject`, corpo `app<Email>Title / Intro / Cta / Ignore` e a versão em texto puro `*Body` |
 | Nome de usuário = CPF (máscara e textos) | `login/resources/js/cpf-mask.js`; chaves do base reescritas em `login/messages/` e `account/messages/` (veja **CPF como nome de usuário**) |
@@ -194,8 +202,11 @@ Caminhos relativos a `themes/default/`, salvo indicação.
 | Nome da marca | `appBrandName`, nos dois `theme.properties` **da marca**: `alt` da logo no login e © do rodapé no login e nos e-mails (em maiúsculas); título, cabeçalho e aviso final dos e-mails usam o *Display name* do realm, quando houver |
 
 A cor primária da casa (Uptech) é `#07111F`, escrita em três lugares que mudam juntos:
-`login/resources/css/brand.css` (tokens e os `rgba(7, 17, 31, …)`), `account/resources/css/brand.css`
-(hex) e o fallback de `appColorPrimary` em `email/html/template.ftl`. As fontes são Manrope, para o texto, e
+`login/resources/css/brand.css` (`--app-aside-bg`, via `--grey-900`), `account/resources/css/brand.css`
+(hex) e o fallback de `appColorPrimary` em `email/html/template.ftl`. No login ela fica no
+painel de marca: sobre a superfície escura o navy sumiria, então botão, links e foco usam
+o teal da paleta (`--secondary-main` `#00C7B9` / `--secondary-light` `#5FE3D9`), o mesmo
+dos destaques do mapa em uptech.com.br. As fontes são Manrope, para o texto, e
 JetBrains Mono, para códigos — ambas sob licença SIL OFL 1.1, compartilhadas por todas as
 marcas. No login elas são servidas localmente (`login/resources/fonts/`, woff2 variável,
 subconjunto latino); nos e-mails vêm do Google Fonts e só carregam em clientes que aceitam
@@ -268,7 +279,9 @@ email e account; a chave informa os idiomas do tema, não restringe os *Supporte
 do realm), no login, nos e-mails e no console da conta (este só com `username=CPF`). Assim que o
 usuário é identificado (OTP, e-mails, pós-login) vale o atributo `locale` dele; antes
 disso, o `ui_locales` enviado pelo cliente ou o `Accept-Language` do navegador. O seletor
-de idioma é renderizado, mas fica oculto por CSS.
+de idioma aparece no canto superior direito quando o realm tem *Internationalization*
+ligado e mais de um idioma; os nomes curtos ("Português", "English", "Español") vêm das
+chaves `locale_pt-BR`, `locale_en` e `locale_es` dos bundles do login.
 
 Toda chave `app*` precisa existir nos três arquivos de `messages/` — e login, e-mail e conta
 têm arquivos separados. Como os valores passam pelo `MessageFormat` do Java, apóstrofos
@@ -332,4 +345,5 @@ fontes são as mesmas do login, referenciadas por caminho relativo ao tema `defa
 3. Recomendado: atualize o `<tag>` em `appLogoUrl` no `email/theme.properties` de cada
    marca (o antigo continua funcionando por redirect).
 4. Suba o ambiente de desenvolvimento e confira as telas de login (rótulo e máscara do
-   CPF), OTP e cadastro, além de um e-mail de teste, em cada marca.
+   CPF, seletor de idioma abrindo, fechando e trocando o idioma, globo girando), OTP e
+   cadastro, além de um e-mail de teste, em cada marca.

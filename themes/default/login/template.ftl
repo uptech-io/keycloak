@@ -116,43 +116,39 @@
 </head>
 
 <body class="app-body" data-page-id="login-${pageId}" data-username-format="${appUsernameFormat}" data-toast-close="${msg('appClose')}" data-passkey-waiting="${msg('appPasskeyWaiting')}">
+<#-- Onde o "info" do base e uma ACAO (link de cadastro no login e nas telas de
+     passkey, reenviar e-mail de verificacao) ele vai abaixo do formulario; onde e
+     ajuda da pagina (ex.: "esqueci a senha") fica no cabecalho. -->
+<#assign appInfoBelow = ["login", "login-username", "webauthn-authenticate", "login-passkeys-conditional-authenticate", "login-verify-email"]?seq_contains(pageId)>
 <div class="app-login">
 
-    <aside class="app-aside">
-        <div class="app-aside__content">
-
-            <img class="app-aside__logo" src="${url.resourcesPath}/img/idm.png" alt="${properties.appBrandName!'Uptech'}" />
-            <h2 class="app-aside__title">${msg("appWelcomeTitle")?no_esc}</h2>
+    <#-- Seletor de idioma no canto superior direito (markup do base; abre com o
+         menu-button-links.js). So aparece com Internationalization ligado e 2+ idiomas. -->
+    <#if realm.internationalizationEnabled && locale.supported?size gt 1>
+        <div class="app-locale" id="kc-locale">
+            <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
+                <div id="kc-locale-dropdown" class="menu-button-links ${properties.kcLocaleDropDownClass!}">
+                    <button tabindex="1" id="kc-current-locale-link" aria-label="${msg("languages")}" aria-haspopup="true" aria-expanded="false" aria-controls="language-switch1">${locale.current}</button>
+                    <ul role="menu" tabindex="-1" aria-labelledby="kc-current-locale-link" aria-activedescendant="" id="language-switch1" class="${properties.kcLocaleListClass!}">
+                        <#assign i = 1>
+                        <#list locale.supported as l>
+                            <li class="${properties.kcLocaleListItemClass!}" role="none">
+                                <a role="menuitem" id="language-${i}" class="${properties.kcLocaleItemClass!}" href="${l.url}">${l.label}</a>
+                            </li>
+                            <#assign i++>
+                        </#list>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <footer class="app-footer--aside"><@appLegalFooter/></footer>
-    </aside>
+    </#if>
 
+    <#-- Formulario a esquerda (superficie escura), painel de marca a direita. -->
     <main class="app-main">
         <div class="app-main__inner">
 
-            <#-- Renderizado como no base, mas oculto: .app-locale { display:none } no style.css. -->
-            <#if realm.internationalizationEnabled && locale.supported?size gt 1>
-                <div class="app-locale" id="kc-locale">
-                    <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
-                        <div id="kc-locale-dropdown" class="menu-button-links ${properties.kcLocaleDropDownClass!}">
-                            <button tabindex="1" id="kc-current-locale-link" aria-label="${msg("languages")}" aria-haspopup="true" aria-expanded="false" aria-controls="language-switch1">${locale.current}</button>
-                            <ul role="menu" tabindex="-1" aria-labelledby="kc-current-locale-link" aria-activedescendant="" id="language-switch1" class="${properties.kcLocaleListClass!}">
-                                <#assign i = 1>
-                                <#list locale.supported as l>
-                                    <li class="${properties.kcLocaleListItemClass!}" role="none">
-                                        <a role="menuitem" id="language-${i}" class="${properties.kcLocaleItemClass!}" href="${l.url}">${l.label}</a>
-                                    </li>
-                                    <#assign i++>
-                                </#list>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </#if>
-
             <div class="app-form" id="kc-form-card">
                 <header class="app-form__header">
-                    <img class="app-form__logo" src="${url.resourcesPath}/img/logo-single.png" alt="${properties.appBrandName!'Uptech'}" />
                     <#if !(auth?has_content && auth.showUsername() && !auth.showResetCredentials())>
                         <#if displayRequiredFields>
                             <div class="app-required-note"><span class="required">*</span> ${msg("requiredFields")}</div>
@@ -189,7 +185,7 @@
 
                     <#-- Sem os ids #kc-info / #kc-info-wrapper de proposito: no login.css do KC
                          eles trazem fundo cinza + margens negativas que quebram o alinhamento. -->
-                    <#if displayInfo>
+                    <#if displayInfo && !appInfoBelow>
                         <div class="app-form__subhead">
                             <#if pageId == "login-reset-password">
                                 <#-- O base escolhe emailInstruction/emailInstructionUsername so por
@@ -238,15 +234,29 @@
                     </div>
                 </div>
 
+                <#if displayInfo && appInfoBelow>
+                    <div class="app-form__below">
+                        <#nested "info">
+                    </div>
+                </#if>
+
             </div>
 
-            <#-- Rodape do mobile: o CSS so o mostra <=860px, quando a aside some. -->
+            <#-- Rodape legal: sempre abaixo do formulario. -->
             <footer class="app-footer--form">
                 <@appLegalFooter/>
                 <@loginFooter.content/>
             </footer>
         </div>
     </main>
+
+    <#-- Painel de marca: so o slogan do produto; o globo pontilhado e um <canvas> que o
+         js/globe.js insere aqui (sem JS, o img/globe.svg estatico via CSS). -->
+    <aside class="app-aside">
+        <div class="app-aside__content">
+            <h2 class="app-aside__title">${msg("appWelcomeTitle")?no_esc}</h2>
+        </div>
+    </aside>
 </div>
 
 <div class="app-toasts" id="app-toasts">

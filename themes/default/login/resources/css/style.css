@@ -62,14 +62,24 @@
     --black: #000000;
     --white: #FFFFFF;
     /* Tokens de marca (--app-primary, --app-accent, --app-ink, --app-aside-*,
-       --app-ring, --app-shadow*) vivem em css/brand.css, que cada marca sobrescreve. */
-    --app-text: var(--grey-700);
-    --app-muted: var(--grey-500);
-    --app-border: var(--grey-200);
-    --app-border-strong: var(--grey-300);
-    --app-bg: var(--grey-100);
-    --app-radius: 4px;
-    --app-radius-sm: 4px;
+       --app-ring, --app-shadow*) vivem em css/brand.css, que cada marca sobrescreve.
+       Neutros da superficie escura do login: so valem aqui (o console da conta e os
+       e-mails continuam claros, com os proprios neutros). */
+    --app-surface: #111418;
+    --app-surface-2: #181C22;
+    --app-surface-3: #20252D;
+    --app-text: #C5CCD6;
+    --app-muted: #8A94A3;
+    --app-placeholder: #7C8694;        /* 4.6:1 sobre --app-surface-2 */
+    --app-border: #232932;
+    --app-border-strong: #606A78;      /* contorno de campos/botoes: 3.4:1 sobre a superficie (WCAG 1.4.11) */
+    --app-border-hover: #818B9A;
+    --app-bg: var(--app-surface-3);
+    --app-error-text: var(--error-light);
+    --app-toast-info: #2C3644;
+    --app-control-h: 40px;
+    --app-radius: 8px;
+    --app-radius-sm: 8px;
     --font-primary: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, sans-serif;
     --font-secondary: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -97,61 +107,91 @@ body.app-body {
 body.app-body {
     font-family: var(--app-font),-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     color: var(--app-text);
-    background: var(--white);
+    background: var(--app-surface);
+    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
 
 .app-login {
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr 40%;
+    grid-template-columns: 58fr 42fr;
     min-height: 100vh;
 }
 
+/* Painel de marca (direita): so o slogan e, atras dele, o globo pontilhado girando
+   (canvas criado por js/globe.js; sem JS fica o img/globe.svg estatico). */
 .app-aside {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 64px clamp(40px, 6vw, 104px);
+    justify-content: flex-start;
+    padding: 64px clamp(32px, 4vw, 56px);
     background: var(--app-aside-bg);
-    border-right: 1px solid var(--grey-100);
+    border-left: 1px solid var(--app-border);
     overflow: hidden;
+}
+
+/* Caixa do globo: quadrada, proporcional ao painel (111% da largura, limitada a 92%
+   da altura da janela), centrada na vertical e cortada pela borda direita. A mascara
+   apaga os pontos do lado do slogan, para o texto nao ficar sobre os continentes. */
+.app-aside::before,
+.app-aside__globe {
+    position: absolute;
+    top: 50%;
+    right: -32%;
+    width: min(111%, 92vh);
+    aspect-ratio: 1;
+    transform: translateY(-50%);
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 52%);
+    mask-image: linear-gradient(90deg, transparent 4%, #000 52%);
+}
+
+/* Sem JS: o primeiro quadro, estatico. Com JS (toast.js poe html.js ainda no <head>)
+   o SVG nem e pintado: o canvas e o SVG juntos piscariam um Brasil branco na carga. */
+.app-aside::before {
+    content: "";
+    background: url("../img/globe.svg") center / contain no-repeat;
+}
+
+html.js .app-aside::before {
+    content: none;
+}
+
+.app-aside__globe {
+    display: block;
+    opacity: 0;
+    transition: opacity .9s ease;
+}
+
+/* globe.js marca o painel (data-globe) depois do primeiro quadro: o canvas entra em fade */
+.app-aside[data-globe] .app-aside__globe {
+    opacity: 1;
 }
 
 .app-aside__content {
     position: relative;
     z-index: 1;
-    text-align: center;
-}
-
-.app-aside__logo {
-    display: block;
-    height: 88px;
-    width: auto;
-    margin: 0 auto 18px;
-    filter: brightness(0) invert(1);
+    max-width: 21rem;
+    text-align: left;
 }
 
 .app-aside__title {
     margin: 0;
     font-family: var(--font-primary);
-    font-size: clamp(24px, 3.4vw, 34px);
-    line-height: 1.334;
+    font-size: clamp(24px, 2.3vw, 30px);
+    line-height: 1.2;
     font-weight: 600;
     letter-spacing: -.02em;
-    color: var(--grey-300);
+    color: var(--app-aside-ink);
 }
 
-/* Entrada suave da logo e do slogan, uma vez, ao carregar (fill both: ficam
-   invisiveis durante o atraso). Desligada em prefers-reduced-motion, abaixo. */
-.app-aside__logo,
+/* Entrada suave do slogan, uma vez, ao carregar. Desligada em
+   prefers-reduced-motion, abaixo. */
 .app-aside__title {
-    animation: app-rise .45s cubic-bezier(.2, .8, .2, 1) both;
-}
-
-.app-aside__title {
-    animation-delay: .08s;
+    animation: app-rise .45s cubic-bezier(.2, .8, .2, 1) .08s both;
 }
 
 @keyframes app-rise {
@@ -167,37 +207,30 @@ body.app-body {
 .app-main {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 40px 24px;
-    background: var(--white);
+    padding: clamp(88px, 12vh, 116px) 24px 48px;
+    background: var(--app-surface);
 }
 
 .app-main__inner {
     width: 100%;
-    max-width: 480px;
+    max-width: 352px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-/* Monograma (logo-single.png) centralizado acima do titulo do formulario. */
-.app-form__logo {
-    display: block;
-    height: 78px;
-    width: auto;
-    margin: 0 auto 26px;
+    gap: 28px;
 }
 
 .app-form__header {
     margin-bottom: 22px;
+    text-align: center;
 }
 
 .app-form__title {
     margin: 0;
-    font-size: clamp(20px, 2.2vw, 24px);
-    line-height: 1.5;
-    font-weight: var(--fw-bold);
+    font-size: 24px;
+    line-height: 1.35;
+    font-weight: var(--fw-semibold);
     letter-spacing: -.01em;
     color: var(--app-ink);
 }
@@ -209,14 +242,25 @@ body.app-body {
     color: var(--app-muted);
 }
 
-.app-form__subhead a {
+.app-form__subhead a,
+.app-form__below a {
     color: var(--app-accent);
     font-weight: 600;
     text-decoration: none;
 }
 
-.app-form__subhead a:hover {
+.app-form__subhead a:hover,
+.app-form__below a:hover {
     text-decoration: underline;
+}
+
+/* Nas telas de login o "info" do base (link de cadastro) vai abaixo do botao. */
+.app-form__below {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.572;
+    color: var(--app-muted);
 }
 
 .app-required-note {
@@ -233,6 +277,7 @@ body.app-body {
 .app-attempted-user {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     margin-top: 8px;
     color: var(--app-muted);
@@ -286,32 +331,30 @@ body.app-body {
     gap: 10px;
 }
 
+/* grid-column-end: o base da "span 6" aos <li> quando ha 4+ provedores */
 .kc-social-links li {
     width: 100%;
-}
-
-.kc-social-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-column-end: span 1;
 }
 
 .pf-c-button.kc-social-item {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     width: 100%;
-    height: 46px;
-    color: var(--grey-800);
-    background: #fff;
+    height: var(--app-control-h);
+    color: var(--app-ink);
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
     text-decoration: none;
-    font-weight: var(--fw-bold);
-    font-size: 15px;
+    font-weight: var(--fw-medium);
+    font-size: 14px;
 }
 
 .pf-c-button.kc-social-item:hover {
-    background: var(--grey-100);
+    background: var(--app-surface-3);
 }
 
 .pf-c-button.kc-social-item::after {
@@ -344,6 +387,21 @@ html[lang="en"] .kc-social-links .kc-social-provider-name::before {
 
 html[lang="es"] .kc-social-links .kc-social-provider-name::before {
     content: "Continuar con ";
+}
+
+/* Dois ou mais provedores: lado a lado e so com o nome. Fica depois das regras de
+   idioma acima (mesma especificidade) para o content:none valer nas tres linguas. */
+.kc-social-links:has(li:nth-child(2)) {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+}
+
+.kc-social-links:has(li:nth-child(2)) .kc-social-provider-name::before {
+    content: none;
+}
+
+/* Quatro ou mais: 2 x 2 (tres colunas nao comportam nomes longos) */
+.kc-social-links:has(li:nth-child(4)) {
+    grid-template-columns: 1fr 1fr;
 }
 
 #social-google .kc-social-provider-logo,
@@ -414,11 +472,11 @@ input.pf-c-form-control,
 textarea.pf-c-form-control,
 select.pf-c-form-control {
     width: 100%;
-    height: 46px;
+    height: var(--app-control-h);
     padding: 0 14px;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--app-ink);
-    background: #fff;
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
     box-shadow: none;
@@ -430,7 +488,7 @@ select.pf-c-form-control {
     --pf-c-form-control--focus--BorderBottomWidth: 1px;
     --pf-c-form-control--focus--BorderBottomColor: var(--app-accent);
     --pf-c-form-control--focus--BoxShadow: var(--app-ring);
-    --pf-c-form-control--hover--BorderBottomColor: var(--grey-400);
+    --pf-c-form-control--hover--BorderBottomColor: var(--app-border-hover);
 }
 
 textarea.pf-c-form-control {
@@ -444,13 +502,22 @@ select.pf-c-form-control {
     padding: 0 14px !important;
 }
 
+/* appearance:none do base tira a seta nativa; sem ela o select parece um campo de texto */
+select.pf-c-form-control {
+    padding-right: 36px !important;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238A94A3%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
 input.pf-c-form-control::placeholder {
-    color: var(--grey-400);
+    color: var(--app-placeholder);
 }
 
 input.pf-c-form-control:hover,
 .pf-c-form-control:hover {
-    border-color: var(--grey-400);
+    border-color: var(--app-border-hover);
 }
 
 input.pf-c-form-control:focus,
@@ -458,6 +525,20 @@ input.pf-c-form-control:focus,
 .pf-c-form-control:focus-within {
     border-color: var(--app-accent);
     box-shadow: var(--app-ring);
+}
+
+/* Preenchimento automatico: sem isto o navegador pinta o campo de claro */
+input.pf-c-form-control:-webkit-autofill,
+input.pf-c-form-control:-webkit-autofill:hover,
+input.pf-c-form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--app-ink);
+    caret-color: var(--app-ink);
+    box-shadow: 0 0 0 1000px var(--app-surface-2) inset;
+    transition: background-color 9999s ease-out 0s;
+}
+
+input.pf-c-form-control:-webkit-autofill:focus {
+    box-shadow: 0 0 0 1000px var(--app-surface-2) inset, var(--app-ring);
 }
 
 .pf-c-form-control[aria-invalid="true"],
@@ -474,15 +555,15 @@ input.pf-c-form-control:focus,
     display: flex;
     align-items: stretch;
     width: 100%;
-    height: 46px;
-    background: #fff;
+    height: var(--app-control-h);
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .pf-c-input-group:hover {
-    border-color: var(--grey-400);
+    border-color: var(--app-border-hover);
 }
 
 .pf-c-input-group:focus-within {
@@ -561,7 +642,7 @@ input.pf-c-form-control:focus,
     display: block;
     margin-top: 6px;
     font-size: 13px;
-    color: var(--error-dark);
+    color: var(--app-error-text);
 }
 
 html.js #input-error,
@@ -603,6 +684,12 @@ html.js .pf-c-form__helper-text.pf-m-error {
     cursor: pointer;
 }
 
+/* Guarda-chuva: qualquer link que o base emita dentro do formulario (ex.: "voltar a
+   aplicacao" na tela de erro) sairia no azul do PatternFly, ilegivel no escuro. */
+.app-form a {
+    color: var(--app-accent);
+}
+
 #kc-form-options a,
 .login-pf-settings a,
 #kc-info a,
@@ -625,7 +712,7 @@ a#switch-organization:hover {
 
 .pf-c-button {
     font-family: inherit;
-    font-weight: 900;
+    font-weight: var(--fw-semibold);
     font-size: 14px;
     line-height: 1.715;
     text-transform: none;
@@ -635,6 +722,22 @@ a#switch-organization:hover {
 
 #kc-form-buttons {
     margin-top: 24px;
+}
+
+/* Grade Bootstrap do markup base (login.css do Keycloak): .form-horizontal
+   .form-group tem margem lateral negativa e os filhos col-* tem padding de 20px, em
+   combinacoes que variam por tela. Na coluna estreita isso desalinha campos, links
+   e botoes entre si; aqui a grade e zerada e tudo ocupa a largura da coluna. */
+.app-form .form-group {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.app-form [class*="col-"] {
+    float: none;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 /* Botoes empilhados (ex.: Enviar + Cancelar nas acoes iniciadas pelo app, como
@@ -647,8 +750,8 @@ a#switch-organization:hover {
 input.pf-c-button.pf-m-primary,
 .pf-c-button.pf-m-primary.pf-m-block {
     width: 100%;
-    height: 48px;
-    font-size: 15px;
+    height: var(--app-control-h);
+    font-size: 14px;
     letter-spacing: .01em;
     color: var(--app-primary-contrast);
     background: var(--app-primary);
@@ -672,54 +775,96 @@ input.pf-c-button.pf-m-primary,
 .pf-c-button.pf-m-secondary,
 .pf-c-button.btn-default {
     width: 100%;
-    height: 46px;
+    height: var(--app-control-h);
     color: var(--app-ink);
-    background: #fff;
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
 }
 
 .pf-c-button.pf-m-secondary:hover,
 .pf-c-button.btn-default:hover {
-    background: var(--grey-100);
+    background: var(--app-surface-3);
 }
 
-/* Seletor de idioma segue no DOM (template.ftl) mas oculto: o idioma vem do
-   Accept-Language ou do atributo locale do usuario. */
-.app-locale {
-    display: none;
+/* Seletor de idioma no canto superior direito (markup e menu-button-links.js do
+   base, que abre a lista com style.display). Fica sobre o painel de marca; abaixo
+   de 860px, sobre o formulario. Os seletores levam os ids do base de proposito: o
+   login.css do Keycloak estiliza #kc-locale, "#kc-locale ul" e
+   "#kc-locale-dropdown a|button" por id (e troca o position por media query), entao
+   uma classe sozinha perderia. */
+#kc-locale.app-locale {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: auto;
+    z-index: 40;
+    text-align: left;
 }
 
-#kc-locale .pf-c-dropdown__toggle,
-#kc-current-locale-link {
+#kc-locale-dropdown {
+    position: relative;
+}
+
+#kc-locale-dropdown #kc-current-locale-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--app-text);
-    background: #fff;
-    border: 1px solid var(--app-border-strong);
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: var(--fw-medium);
+    color: var(--app-aside-ink);
+    background: transparent;
+    border: 0;
     border-radius: var(--app-radius);
     cursor: pointer;
+    transition: background .15s ease;
 }
 
-#kc-current-locale-link::after {
+#kc-locale-dropdown #kc-current-locale-link::before {
     content: "";
-    width: 7px;
-    height: 7px;
-    border-right: 1.6px solid currentColor;
-    border-bottom: 1.6px solid currentColor;
-    transform: rotate(45deg) translateY(-1px);
-    opacity: .7;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c2.5%202.7%203.8%205.7%203.8%209s-1.3%206.3-3.8%209c-2.5-2.7-3.8-5.7-3.8-9s1.3-6.3%203.8-9z%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c2.5%202.7%203.8%205.7%203.8%209s-1.3%206.3-3.8%209c-2.5-2.7-3.8-5.7-3.8-9s1.3-6.3%203.8-9z%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
 }
 
-#kc-current-locale-link:hover {
-    border-color: var(--grey-400);
+/* Chevron em SVG (mascara): um quadrado de 6px com bordas girado 45 graus renderiza
+   torto nesse tamanho. O seletor leva o id do dropdown para vencer o ::after do base. */
+#kc-locale-dropdown #kc-current-locale-link::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin-left: 0;
+    border: 0;
+    transform: none;
+    opacity: .85;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+    transition: transform .15s ease;
+}
+
+#kc-locale-dropdown #kc-current-locale-link[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+#kc-current-locale-link:hover,
+#kc-current-locale-link[aria-expanded="true"] {
+    background: rgba(255, 255, 255, .14);
+}
+
+#kc-current-locale-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
 }
 
 ul.pf-c-dropdown__menu,
-#language-switch1 {
+#kc-locale #language-switch1 {
     display: none;
     position: absolute;
     right: 0;
@@ -728,99 +873,66 @@ ul.pf-c-dropdown__menu,
     margin: 0;
     padding: 6px;
     list-style: none;
-    background: #fff;
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius);
     box-shadow: var(--app-shadow);
     z-index: 30;
 }
 
-.pf-c-dropdown__menu-item {
+.pf-c-dropdown__menu-item,
+#kc-locale-dropdown a.pf-c-dropdown__menu-item {
     display: block;
-    padding: 9px 12px;
-    border-radius: var(--app-radius);
+    text-align: left;
+    padding: 8px 12px;
+    border-radius: calc(var(--app-radius) - 2px);
     font-size: 14px;
     color: var(--app-text);
     text-decoration: none;
 }
 
-.pf-c-dropdown__menu-item:hover {
-    background: var(--grey-100);
+.pf-c-dropdown__menu-item:hover,
+.pf-c-dropdown__menu-item:focus,
+#kc-locale-dropdown a.pf-c-dropdown__menu-item:hover,
+#kc-locale-dropdown a.pf-c-dropdown__menu-item:focus {
+    background: var(--app-surface-3);
     color: var(--app-ink);
+    outline: none;
 }
 
+/* Rodape legal: sempre abaixo do formulario, pequeno e centrado. */
 .app-footer__legal {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 4px 12px;
+    gap: 2px 14px;
     font-size: 12px;
     line-height: 1.6;
+    color: var(--app-muted);
+}
+
+.app-footer__legal span {
+    flex: 1 0 100%;
+    text-align: center;
 }
 
 .app-footer__legal a {
-    text-decoration: none;
+    color: var(--app-text);
+    text-decoration: underline;
+    text-decoration-color: var(--app-border-hover);
+    text-underline-offset: 3px;
 }
 
 .app-footer__legal a:hover {
-    text-decoration: underline;
-}
-
-.app-footer__legal a::before {
-    content: "|";
-    margin-right: 12px;
-    opacity: .55;
-}
-
-.app-footer--aside {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 28px;
-    padding: 0 clamp(24px, 5vw, 56px);
-}
-
-.app-footer--aside .app-footer__legal {
-    color: var(--app-aside-muted);
-}
-
-.app-footer--aside .app-footer__legal a {
-    color: var(--app-aside-muted);
-}
-
-.app-footer--aside .app-footer__legal a::before {
-    color: var(--app-aside-rule);
-}
-
-.app-footer--form {
-    display: none;
-}
-
-.app-footer--form .app-footer__legal {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--app-muted);
-}
-
-.app-footer--form .app-footer__legal a {
-    color: var(--app-muted);
-}
-
-.app-footer--form .app-footer__legal a::before {
-    content: none;
-}
-
-.app-footer--form .app-footer__legal span {
-    order: 1;
+    text-decoration-color: currentColor;
 }
 
 /* Container fixo onde os toasts empilham (o do servidor vem no template.ftl;
    toast.js cria os de erro de campo dentro dele). */
 .app-toasts {
     position: fixed;
-    top: 20px;
+    top: 68px;
     right: 20px;
     z-index: 1200;
     display: flex;
@@ -856,13 +968,14 @@ ul.pf-c-dropdown__menu,
     to { opacity: 0; transform: translateX(20px); }
 }
 
-.app-toast--error   { background: var(--error-main); }
-.app-toast--success { background: var(--success-main); }
+/* erro em --error-dark (branco 4.8:1); sucesso e aviso com texto escuro (7:1) */
+.app-toast--error   { background: var(--error-dark); }
+.app-toast--success { background: var(--success-main); color: var(--grey-900); }
 .app-toast--warning { background: var(--warning-main); color: var(--grey-900); }
 
-/* info em --app-ink, nao em --app-primary: com uma primaria laranja (upchip) o
-   toast info ficaria igual ao de aviso (--warning-main) */
-.app-toast--info    { background: var(--app-ink); }
+/* info em cinza-azulado neutro, nao em --app-primary: com uma primaria laranja
+   (upchip) o toast info ficaria igual ao de aviso (--warning-main) */
+.app-toast--info    { background: var(--app-toast-info); }
 
 .app-toast__icon {
     flex: 0 0 auto;
@@ -959,7 +1072,7 @@ ul.pf-c-dropdown__menu,
     font-size: 12.5px;
     font-weight: 600;
     color: var(--app-text);
-    background: var(--grey-100);
+    background: var(--app-surface-3);
     border: 1px solid var(--app-border);
     border-radius: 999px;
     padding: 3px 10px;
@@ -982,7 +1095,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     width: 170px;
     height: 170px;
     margin: 10px 0 12px;
-    background: #fff;
+    background: #fff; /* QR precisa de fundo branco para ser lido */
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
 }
@@ -1006,7 +1119,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     font-size: 15px;
     letter-spacing: .08em;
     color: var(--app-ink);
-    background: var(--grey-100);
+    background: var(--app-surface-3);
     border: 1px solid var(--app-border);
     border-radius: var(--app-radius-sm);
     padding: 6px 10px;
@@ -1039,9 +1152,21 @@ html[lang="es"] #kc-totp-supported-apps::after {
     flex: 1;
 }
 
+/* logout-confirm e oauth-grant usam a mesma classe no <form>, mas com os botoes dentro
+   de um .form-group: sem isto o grupo encolhe ate o texto do botao. */
+.form-actions > .form-group {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 @media (max-width: 1100px) {
     .app-login {
-        grid-template-columns: 1fr 460px;
+        grid-template-columns: 60fr 40fr;
+    }
+    /* painel estreito: globo mais para fora, para o slogan nao cair sobre os continentes */
+    .app-aside::before,
+    .app-aside__globe {
+        right: -52%;
     }
 }
 
@@ -1052,12 +1177,35 @@ html[lang="es"] #kc-totp-supported-apps::after {
     .app-aside {
         display: none;
     }
-    .app-footer--form {
-        display: block;
-        margin-top: 4px;
-    }
+    /* o topo guarda espaco para o seletor de idioma, que aqui fica sobre o formulario */
     .app-main {
-        padding: 40px 18px;
+        padding: 76px 18px 40px;
+    }
+    #kc-locale.app-locale {
+        top: 18px;
+        right: 12px;
+    }
+    #kc-locale-dropdown #kc-current-locale-link {
+        color: var(--app-ink);
+    }
+    #kc-current-locale-link:hover,
+    #kc-current-locale-link[aria-expanded="true"] {
+        background: var(--app-surface-3);
+    }
+    /* Sem o painel de marca o toast cairia sobre o titulo do formulario: vira
+       snackbar no rodape da janela. */
+    .app-toasts {
+        top: auto;
+        bottom: 16px;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        right: 16px;
+        left: 16px;
+        max-width: none;
+    }
+    /* 16px evita o zoom automatico do iOS ao focar o campo */
+    input.pf-c-form-control,
+    .pf-c-form-control {
+        font-size: 16px;
     }
     #kc-totp-settings {
         text-align: left;
@@ -1066,16 +1214,14 @@ html[lang="es"] #kc-totp-supported-apps::after {
 
 @media (max-width: 480px) {
     .app-main {
-        padding: 30px 16px;
+        padding: 72px 16px 32px;
     }
     .app-form__title {
-        font-size: 24px;
+        font-size: 22px;
     }
     .app-toasts {
-        top: 12px;
         right: 12px;
         left: 12px;
-        max-width: none;
     }
 }
 
@@ -1085,7 +1231,6 @@ html[lang="es"] #kc-totp-supported-apps::after {
     }
     .app-toast,
     .app-toast--hiding,
-    .app-aside__logo,
     .app-aside__title {
         animation: none !important;
     }
@@ -1154,7 +1299,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     font-size: 24px;
     font-weight: var(--fw-semibold);
     color: var(--app-ink);
-    background: #fff;
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
     outline: none;
@@ -1162,7 +1307,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
 }
 
 [data-page-id="login-login-otp"] .app-otp-box:hover {
-    border-color: var(--grey-400);
+    border-color: var(--app-border-hover);
 }
 
 [data-page-id="login-login-otp"] .app-otp-box:focus {
@@ -1242,8 +1387,8 @@ html[lang="es"] #kc-totp-supported-apps::after {
     padding: 12px 14px;
     font: inherit;
     color: var(--app-text);
-    background: #fff;
-    border: 1px solid var(--app-border);
+    background: var(--app-surface-2);
+    border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
     text-align: left;
 }
@@ -1300,8 +1445,8 @@ html[lang="es"] #kc-totp-supported-apps::after {
 }
 
 [data-page-id="login-select-authenticator"] .select-auth-box-parent:hover {
-    background: var(--grey-100);
-    border-color: var(--app-border-strong);
+    background: var(--app-surface-3);
+    border-color: var(--app-border-hover);
 }
 
 [data-page-id="login-select-authenticator"] .select-auth-box-parent:focus-visible {
@@ -1327,14 +1472,14 @@ a#authenticateWebAuthnButton {
     justify-content: center;
     gap: 10px;
     width: 100%;
-    height: 46px;
+    height: var(--app-control-h);
     margin-top: 12px;
     color: var(--app-ink);
-    background: #fff;
+    background: var(--app-surface-2);
     border: 1px solid var(--app-border-strong);
     border-radius: var(--app-radius-sm);
-    font-size: 15px;
-    font-weight: var(--fw-bold);
+    font-size: 14px;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
     transition: background .15s;
 }
@@ -1349,7 +1494,7 @@ a#authenticateWebAuthnButton::before {
 }
 
 a#authenticateWebAuthnButton:hover {
-    background: var(--grey-100);
+    background: var(--app-surface-3);
 }
 
 a#authenticateWebAuthnButton:focus-visible {
@@ -1387,14 +1532,71 @@ a#authenticateWebAuthnButton:focus-visible {
 }
 
 #kc-form-passkey-button #authenticateWebAuthnButton {
-    height: 46px;
+    height: var(--app-control-h);
     color: var(--app-ink);
-    background-color: #fff;
+    background-color: var(--app-surface-2);
     background-image: none;
     border: 1px solid var(--app-border-strong);
     font-weight: var(--fw-bold);
 }
 
 #kc-form-passkey-button #authenticateWebAuthnButton:hover {
-    background-color: var(--grey-100);
+    background-color: var(--app-surface-3);
+}
+
+/* ============ Alertas e telas do base sem regra propria ============
+   PatternFly pinta alertas de creme com texto quase preto e botoes-link de azul:
+   sobre a superficie escura viram um bloco claro no meio da coluna. Aparecem em
+   recovery-authn-code-config (aviso + imprimir/baixar/copiar) e em
+   delete-account-confirm (.alert do PatternFly 3). */
+.app-body .pf-c-alert,
+.app-body .alert {
+    color: var(--app-text);
+    background: var(--app-surface-2);
+    border: 1px solid var(--app-border-strong);
+    border-left: 3px solid var(--warning-main);
+    border-radius: var(--app-radius-sm);
+    box-shadow: none;
+}
+
+.app-body .pf-c-alert.pf-m-danger,
+.app-body .alert.alert-danger,
+.app-body .alert.alert-error {
+    border-left-color: var(--error-main);
+}
+
+.app-body .pf-c-alert.pf-m-success,
+.app-body .alert.alert-success {
+    border-left-color: var(--success-main);
+}
+
+.app-body .pf-c-alert.pf-m-info,
+.app-body .alert.alert-info {
+    border-left-color: var(--app-accent);
+}
+
+.app-body .pf-c-alert__title {
+    color: var(--app-ink);
+}
+
+.app-body .pf-c-alert__description,
+.app-body .pf-c-alert__description p,
+.app-body .alert p {
+    color: var(--app-text);
+}
+
+.app-body .pf-c-button.pf-m-link {
+    color: var(--app-accent);
+}
+
+.app-body .pf-c-button.pf-m-link i {
+    color: inherit;
+}
+
+.app-body .kc-recovery-codes-list {
+    border-color: var(--app-border-strong);
+}
+
+.app-body .kc-recovery-codes-list li span {
+    color: var(--app-muted);
 }

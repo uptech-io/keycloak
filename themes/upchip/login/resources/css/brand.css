@@ -3,35 +3,33 @@
    (--grey-*, --white) vem do style.css do default.
    Fonte: Manual de Identidade Visual - UPCHIP.pdf (raiz do repo), p.1:
    PANTONE Orange 021 C #FF6600 (principal), 1235 C #FFC200 (amarelo),
-   429 C #B0B9BF (cinza; nao serve como texto sobre branco, 2.0:1, por isso
-   os neutros seguem os --grey-* da casa).
+   429 C #B0B9BF (cinza).
    Laranja em uso: #BD4B00 = #FF6600 com o matiz (24 graus) e a saturacao
    travados e a luminosidade reduzida (~25%), por decisao da marca (o #FF6600
-   chapado ficou forte demais em tela); de quebra passa WCAG AA: branco sobre
-   #BD4B00 = 5.0:1, #BD4B00 sobre branco = 5.0:1, sobre #F5F7FA = 4.7:1.
-   Hover: #A34100 (mesmo matiz, -5 pontos de luminosidade). */
+   chapado ficou forte demais em tela); branco sobre #BD4B00 = 5.0:1.
+   Hover: #A34100 (mesmo matiz, -5 pontos de luminosidade).
+   O formulario fica na superficie escura do default (#111418): ali o #BD4B00 como
+   TEXTO da so 3.6:1, entao links e foco usam um tom mais claro do mesmo matiz,
+   #FF9752 (hsl 24 100% 66%, 8.7:1). Botao e painel seguem no #BD4B00. */
 :root {
     --app-primary: #BD4B00;                    /* botao primario */
     --app-primary-hover: #A34100;
     --app-primary-contrast: var(--white);
-    --app-accent: #BD4B00;                     /* links, foco dos campos e cards, checkbox */
-    --app-ink: var(--grey-900);                /* titulos, texto forte, toast info (neutro: nao colide com o aviso laranja) */
+    --app-accent: #FF9752;                     /* links, foco dos campos e cards, checkbox */
+    --app-ink: var(--grey-100);                /* titulos e texto forte */
 
-    /* Painel lateral chapado no laranja da marca (sem o degrade das aplicacoes
-       impressas): logo branca, titulo --grey-300 (3.4:1). O rodape e o separador
-       vao a branco cheio: o branco 60% da casa daria so 2.8:1 sobre o laranja
-       (5.0:1 cheio; separador com opacity .55 = 2.6:1, suficiente para uma linha). */
+    /* Painel de marca chapado no laranja (sem o degrade das aplicacoes impressas):
+       slogan em branco (5.0:1), pontos do globo em branco translucido e o Brasil no
+       amarelo 1235 C. */
     --app-aside-bg: #BD4B00;
-    --app-aside-muted: var(--white);
-    --app-aside-rule: var(--white);
-    --app-aside-accent: #FFC200;               /* PANTONE 1235 C; gancho sem uso hoje; so sobre o painel (1.6:1 sobre branco) */
+    --app-aside-ink: var(--white);
+    --app-aside-map: rgba(255, 255, 255, .32);
+    --app-aside-map-hi: #FFC200;
+    --app-aside-accent: #FFC200;               /* PANTONE 1235 C; gancho sem uso hoje; so sobre o painel */
 
-    /* Anel de foco, --app-shadow e --app-shadow-strong com o rgb de --app-primary;
-       --app-shadow-toast com o rgb de --app-ink (regra do brand.css do default).
-       Alfas ~20% acima dos da casa (.22/.12/.07/.30 contra .18/.10/.06/.24), de
-       proposito: o laranja e mais claro que o navy e rende sombra mais fraca. */
-    --app-ring: 0 0 0 3px rgba(189, 75, 0, .22);
-    --app-shadow: 0 18px 48px rgba(189, 75, 0, .12), 0 4px 12px rgba(189, 75, 0, .07);
-    --app-shadow-strong: 0 6px 16px rgba(189, 75, 0, .30);
-    --app-shadow-toast: 0 8px 24px rgba(7, 17, 31, .22), 0 2px 6px rgba(7, 17, 31, .12);
+    /* Anel de foco com o rgb de --app-accent; sombras pretas, como na casa. */
+    --app-ring: 0 0 0 3px rgba(255, 151, 82, .30);
+    --app-shadow: 0 18px 48px rgba(0, 0, 0, .45), 0 4px 12px rgba(0, 0, 0, .30);
+    --app-shadow-strong: 0 6px 16px rgba(0, 0, 0, .45);
+    --app-shadow-toast: 0 8px 24px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .30);
 }

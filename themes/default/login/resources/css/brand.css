@@ -4,29 +4,32 @@
    o style.css nao tem fallback (token ausente = propriedade invalida).
    A paleta crua (--grey-*, --primary-*, --secondary-*, --white) vem do
    style.css e pode ser referenciada aqui. Estes sao os valores da casa
-   (Uptech), herdados por quem nao sobrescreve. */
+   (Uptech), herdados por quem nao sobrescreve.
+   O formulario fica numa superficie ESCURA (--app-surface, #111418, neutros no
+   style.css): os tokens daqui precisam funcionar sobre ela. O navy da casa
+   (#07111F) some nesse fundo, entao botao, links e foco usam o teal da paleta
+   (--secondary-*, o mesmo dos destaques do mapa em uptech.com.br); o navy fica no
+   painel de marca. */
 :root {
-    --app-primary: var(--grey-900);            /* botao primario */
-    --app-primary-hover: var(--grey-800);
-    --app-primary-contrast: var(--white);      /* texto sobre --app-primary */
-    --app-accent: var(--grey-900);             /* links (inclusive o do subtitulo), foco dos campos e cards, checkbox */
-    --app-ink: var(--grey-900);                /* titulos, texto forte, toast info */
+    --app-primary: var(--secondary-main);      /* botao primario: #00C7B9 */
+    --app-primary-hover: var(--secondary-light);
+    --app-primary-contrast: var(--grey-900);   /* texto sobre --app-primary (8.9:1) */
+    --app-accent: var(--secondary-light);      /* links, foco dos campos e cards, checkbox (12:1 sobre a superficie) */
+    --app-ink: var(--grey-100);                /* titulos e texto forte */
 
-    /* Painel lateral: fundo escuro o bastante para a logo (forcada a branco) e o
-       titulo em --grey-300; o rodape legal e o separador "|" dele (opacity .55)
-       tem cor propria para acompanhar o fundo da marca. */
+    /* Painel de marca (direita): fundo, cor do slogan e cores do globo pontilhado
+       (js/globe.js le --app-aside-map e --app-aside-map-hi; o segundo marca o Brasil). */
     --app-aside-bg: var(--grey-900);
-    --app-aside-muted: rgba(255, 255, 255, .6); /* rodape legal do painel (12px) */
-    --app-aside-rule: var(--grey-600);          /* separador "|" do rodape */
+    --app-aside-ink: var(--grey-100);
+    --app-aside-map: rgba(255, 255, 255, .24);
+    --app-aside-map-hi: var(--secondary-light);
     --app-aside-accent: var(--secondary-main); /* palavra em destaque do appWelcomeTitle (gancho, sem uso hoje:
                                                   a mensagem aceita <span class="app-aside__accent">) */
 
-    /* Regra unica para as sombras: anel de foco, --app-shadow e --app-shadow-strong
-       usam o rgb de --app-primary; --app-shadow-toast usa o rgb de --app-ink
-       (neutra: os toasts tem fundo de status). Na casa os dois sao #07111F.
-       Os alfas sao parte do valor: uma marca pode ajusta-los (anotando o motivo). */
-    --app-ring: 0 0 0 3px rgba(7, 17, 31, .18);
-    --app-shadow: 0 18px 48px rgba(7, 17, 31, .10), 0 4px 12px rgba(7, 17, 31, .06);
-    --app-shadow-strong: 0 6px 16px rgba(7, 17, 31, .24);
-    --app-shadow-toast: 0 8px 24px rgba(7, 17, 31, .22), 0 2px 6px rgba(7, 17, 31, .12);
+    /* Anel de foco com o rgb de --app-accent; sombras pretas (sobre fundo escuro uma
+       sombra colorida nao aparece). Os alfas sao parte do valor. */
+    --app-ring: 0 0 0 3px rgba(95, 227, 217, .28);
+    --app-shadow: 0 18px 48px rgba(0, 0, 0, .45), 0 4px 12px rgba(0, 0, 0, .30);
+    --app-shadow-strong: 0 6px 16px rgba(0, 0, 0, .45);
+    --app-shadow-toast: 0 8px 24px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .30);
 }

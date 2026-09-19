@@ -1,8 +1,9 @@
 /* Tokens de marca UPchip no console da conta: sobrescreve
    account/resources/css/brand.css do default. Manter os tres tokens.
-   Mesmos valores do login/resources/css/brand.css desta marca: laranja
-   #BD4B00 (Pantone 021 C escurecido, ver comentario la) no masthead, botoes
-   e links; hover #A34100. */
+   Laranja #BD4B00 (Pantone 021 C escurecido, ver o comentario do
+   login/resources/css/brand.css desta marca) no masthead, botoes e links;
+   hover #A34100. O console e claro, entao aqui o laranja serve tambem de texto
+   (5.0:1 sobre branco); no login escuro os links usam outro tom. */
 html:root {
     --app-primary: #BD4B00;
     --app-primary-hover: #A34100;
