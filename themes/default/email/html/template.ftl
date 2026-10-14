@@ -1,8 +1,8 @@
 <#-- Wrapper branded dos e-mails (override de base/email/html/template.ftl).
      Estiliza TODOS os e-mails: cabecalho com a logo/nome do realm, card de conteudo
-     e rodape. HTML email-safe (tabelas + estilos inline). Fontes: Manrope (texto) e
-     JetBrains Mono (codigo) via Google Fonts nos clientes que carregam web fonts
-     (Apple Mail, iOS); os demais caem no stack do sistema. Helpers: h1, p, button, code.
+     e rodape. HTML email-safe (tabelas + estilos inline). Fontes: sem web font (nenhuma
+     requisicao a servidor de fontes); os stacks comecam por Manrope (texto) e JetBrains
+     Mono (codigo), usadas so se instaladas no leitor. Helpers: h1, p, button, code.
      Cores de marca: appColorPrimary (barra do topo, titulos, CTA, codigo) e
      appColorOnPrimary (texto do CTA) do theme.properties de cada marca; sem elas, valem
      as da casa. O cabecalho e BRANCO: a logo e o monograma da marca (logo-single.png),
@@ -22,7 +22,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light only" />
     <title>${brand}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&amp;family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
 </head>
 <body style="margin:0; padding:0; background:#F5F7FA; -webkit-font-smoothing:antialiased;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F7FA;">

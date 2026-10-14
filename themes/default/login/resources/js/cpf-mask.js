@@ -18,7 +18,8 @@
  * ou U. Assim nada digitado se perde no modo misto. Durante uma composicao de IME
  * (teclado virtual) nada e reescrito; a mascara entra no compositionend.
  * Delete/Backspace sobre um separador (keydown) pulam para o digito vizinho.
- * Ao enviar, o que a mascara exibe vai so em digitos (em modo cpf, sempre).
+ * Ao enviar, o que a mascara exibe vai so em digitos (em modo cpf, sempre), e um CPF
+ * completo digitado com a propria pontuacao tambem (a regra do sync()).
  * Valor posto pelo servidor (login.username apos erro, auth.attemptedUsername, valor
  * do User Profile): ate 11 digitos e formatado; qualquer outro (e-mail, username
  * legado ou vindo de IdP, 12+ digitos) nunca e reescrito — em modo cpf o campo fica
@@ -168,14 +169,16 @@
             else if (e.key === "Backspace" && /[.\-]/.test(shown.charAt(s - 1))) setCaret(s - 1);
         });
 
-        // O que a mascara exibe vai so em digitos (em modo cpf, sempre); o resto vai como
-        // o usuario digitou. Um valor que chegou sem input (autofill) e sincronizado
-        // antes. Roda depois do onsubmit inline do base (login.disabled = true), que nao
-        // mexe no valor do campo.
+        // O que a mascara exibe vai so em digitos (em modo cpf, sempre); um CPF completo
+        // com a pontuacao do proprio usuario (modo misto) tambem, como no sync(); o resto
+        // vai como o usuario digitou. Um valor que chegou sem input (autofill) e
+        // sincronizado antes. Roda depois do onsubmit inline do base
+        // (login.disabled = true), que nao mexe no valor do campo.
         if (field.form) {
             field.form.addEventListener("submit", function () {
                 if (field.value !== shown) sync(field.value);
                 if (strict || masked) field.value = U;
+                else if (looksLikeCpf(U) && digits(U).length === LEN) field.value = digits(U);
             });
         }
 

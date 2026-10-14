@@ -199,11 +199,6 @@ html.js .app-aside::before {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.app-aside__accent {
-    color: var(--app-aside-accent);
-}
-
-
 .app-main {
     position: relative;
     display: flex;
@@ -791,14 +786,27 @@ input.pf-c-button.pf-m-primary,
    de 860px, sobre o formulario. Os seletores levam os ids do base de proposito: o
    login.css do Keycloak estiliza #kc-locale, "#kc-locale ul" e
    "#kc-locale-dropdown a|button" por id (e troca o position por media query), entao
-   uma classe sozinha perderia. */
+   uma classe sozinha perderia. z-index acima do .app-toasts (1200): o menu aberto
+   fica sobre a pilha, que pode ter toast de erro fixo (nao some sozinho). */
 #kc-locale.app-locale {
     position: absolute;
     top: 20px;
     right: 24px;
     width: auto;
-    z-index: 40;
+    z-index: 1300;
     text-align: left;
+}
+
+/* Monograma da marca no canto superior esquerdo: mesmo topo e mesma altura do botao
+   de idioma (36px), recuo espelhado. A cor vem do --app-logo-filter do brand.css. */
+.app-logo {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    height: 36px;
+    width: auto;
+    z-index: 40;
+    filter: var(--app-logo-filter);
 }
 
 #kc-locale-dropdown {
@@ -1185,6 +1193,10 @@ html[lang="es"] #kc-totp-supported-apps::after {
         top: 18px;
         right: 12px;
     }
+    .app-logo {
+        top: 18px;
+        left: 12px;
+    }
     #kc-locale-dropdown #kc-current-locale-link {
         color: var(--app-ink);
     }
@@ -1292,6 +1304,10 @@ html[lang="es"] #kc-totp-supported-apps::after {
 [data-page-id="login-login-otp"] .app-otp-box {
     flex: 1 1 0;
     min-width: 0;
+    /* width: 0 porque um <input> tem largura intrinseca (~20 caracteres) que o flex nao
+       vence no min-content da coluna 1fr: sem isto a pagina fica com 384 px e rola de
+       lado em celulares mais estreitos (360/375 px). */
+    width: 0;
     height: 56px;
     padding: 0;
     text-align: center;
@@ -1323,7 +1339,7 @@ html[lang="es"] #kc-totp-supported-apps::after {
     box-shadow: 0 0 0 3px rgba(240, 68, 56, .20);
 }
 
-/* respiro no meio; otp-segments.js poe a classe no 3o digito (de 6) */
+/* respiro no meio; otp-segments.js poe a classe no fim da 1a metade (3o de 6, 4o de 8) */
 [data-page-id="login-login-otp"] .app-otp-box--group-end {
     margin-right: 8px;
 }

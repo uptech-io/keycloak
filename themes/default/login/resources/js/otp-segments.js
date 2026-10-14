@@ -3,8 +3,8 @@
  * Progressive enhancement sobre o #otp de login-otp.ftl: N caixas de 1 digito
  * espelham o valor de volta no #otp, que continua sendo o campo enviado ao
  * Keycloak. Sem JS o #otp funciona normalmente.
- * N vem de data-otp-length no #otp; nenhum template emite esse atributo, entao
- * na pratica sao sempre 6.
+ * N vem de data-otp-length no #otp, que o login-otp.ftl preenche com os digitos
+ * da politica OTP do realm (otpLogin.policy.digits); sem o atributo, 6.
  */
 (function () {
     "use strict";
@@ -44,7 +44,7 @@
             b.setAttribute("aria-label", groupLabel + " — " + (i + 1) + "/" + len);
             b.className = "app-otp-box";
             if (invalid) b.classList.add("app-otp-box--error");
-            // respiro maior no meio (ex.: 6 digitos = 3 + 3)
+            // respiro maior no meio (6 digitos = 3 + 3, 8 = 4 + 4)
             if (len % 2 === 0 && i === len / 2 - 1) b.classList.add("app-otp-box--group-end");
             wrap.appendChild(b);
             boxes.push(b);

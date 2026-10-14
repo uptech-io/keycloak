@@ -1,11 +1,29 @@
 <#import "footer.ftl" as loginFooter>
 <#import "theme-resources.ftl" as themeResourceTags>
 
+<#-- Chave de identidade (appBrandName, appPrivacyUrl, appTermsUrl): o atributo do cliente
+     vence o atributo do realm, que vence o theme.properties da marca, que vence o padrao.
+     Os atributos tem o mesmo nome da chave e sao gravados pela API Admin (o console nao
+     tem tela para atributos livres); so chaves especificas sao lidas, nunca o mapa
+     inteiro (clientes SAML guardam chaves privadas em atributos). O bean "client" vem do
+     cliente da requisicao e falta em algumas paginas (ex.: erro "Client not found"), dai
+     o "!" em cada passo. Chave terminada em Url so aceita valor http:// ou https://; outro
+     valor (javascript:, data:, sem esquema) vira o padrao "#": o Keycloak so confere o
+     esquema das URLs dele (policyUri, tosUri...) e o auto-escape do HTML nao barra
+     javascript:. -->
+<#function appIdentity key default="">
+    <#local value = (client.attributes[key])!''>
+    <#if !value?has_content><#local value = (realm.attributes[key])!''></#if>
+    <#if !value?has_content><#local value = (properties[key])!''></#if>
+    <#if key?ends_with("Url") && !(value?starts_with("https://") || value?starts_with("http://"))><#local value = ''></#if>
+    <#return value?has_content?then(value, default)>
+</#function>
+
 <#macro appLegalFooter>
     <div class="app-footer__legal">
-        <span>&copy; ${.now?string('yyyy')} ${(properties.appBrandName!'Uptech')?upper_case}. ${msg("appRights")}</span>
-        <a href="${(properties.appPrivacyUrl!'')?has_content?then(properties.appPrivacyUrl, '#')}">${msg("appPrivacyPolicy")}</a>
-        <a href="${(properties.appTermsUrl!'')?has_content?then(properties.appTermsUrl, '#')}">${msg("appTermsPolicy")}</a>
+        <span>&copy; ${.now?string('yyyy')} ${appIdentity("appBrandName", "Uptech")?upper_case}. ${msg("appRights")}</span>
+        <a href="${appIdentity("appPrivacyUrl", "#")}">${msg("appPrivacyPolicy")}</a>
+        <a href="${appIdentity("appTermsUrl", "#")}">${msg("appTermsPolicy")}</a>
     </div>
 </#macro>
 
@@ -143,6 +161,11 @@
         </div>
     </#if>
 
+    <#-- Monograma da marca no canto superior esquerdo, alinhado ao seletor de idioma
+         (arquivo da marca, ou o do default pela cadeia de temas; cor pelo
+         --app-logo-filter do brand.css: a casa vira silhueta branca). -->
+    <img class="app-logo" src="${url.resourcesPath}/img/logo-single.png" alt="${appIdentity("appBrandName", "Uptech")}">
+
     <#-- Formulario a esquerda (superficie escura), painel de marca a direita. -->
     <main class="app-main">
         <div class="app-main__inner">
@@ -254,7 +277,7 @@
          js/globe.js insere aqui (sem JS, o img/globe.svg estatico via CSS). -->
     <aside class="app-aside">
         <div class="app-aside__content">
-            <h2 class="app-aside__title">${msg("appWelcomeTitle")?no_esc}</h2>
+            <h2 class="app-aside__title">${kcSanitize(msg("appWelcomeTitle"))?no_esc}</h2>
         </div>
     </aside>
 </div>

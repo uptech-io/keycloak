@@ -1,9 +1,9 @@
 /* Tokens de marca UPchip: sobrescreve login/resources/css/brand.css do default.
    Manter TODOS os tokens (o style.css nao tem fallback); a paleta crua
    (--grey-*, --white) vem do style.css do default.
-   Fonte: Manual de Identidade Visual - UPCHIP.pdf (raiz do repo), p.1:
-   PANTONE Orange 021 C #FF6600 (principal), 1235 C #FFC200 (amarelo),
-   429 C #B0B9BF (cinza).
+   Fonte: Manual de Identidade Visual da UPchip (documento da marca, mantido
+   fora do repositorio), p.1: PANTONE Orange 021 C #FF6600 (principal),
+   1235 C #FFC200 (amarelo), 429 C #B0B9BF (cinza).
    Laranja em uso: #BD4B00 = #FF6600 com o matiz (24 graus) e a saturacao
    travados e a luminosidade reduzida (~25%), por decisao da marca (o #FF6600
    chapado ficou forte demais em tela); branco sobre #BD4B00 = 5.0:1.
@@ -25,7 +25,10 @@
     --app-aside-ink: var(--white);
     --app-aside-map: rgba(255, 255, 255, .32);
     --app-aside-map-hi: #FFC200;
-    --app-aside-accent: #FFC200;               /* PANTONE 1235 C; gancho sem uso hoje; so sobre o painel */
+
+    /* Monograma no canto superior esquerdo do login: o losango laranja ja aparece
+       na superficie escura, sem filtro. */
+    --app-logo-filter: none;
 
     /* Anel de foco com o rgb de --app-accent; sombras pretas, como na casa. */
     --app-ring: 0 0 0 3px rgba(255, 151, 82, .30);

@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+  Teste da mascara de CPF (themes/default/login/resources/js/cpf-mask.js). Fica fora de themes/
+  porque o Dockerfile copia themes/ para a imagem e o Keycloak serve publicamente o que estiver
+  em resources/ (onde esta pagina ficaria, ao lado do cpf-mask.js).
+  Sem dependencias: abra no Chrome (file://) ou rode headless da raiz do repo, uma carga por
+  variante, porque a mascara le o modo e o valor do servidor uma vez so, no DOMContentLoaded:
+    ?pre=12345678909 (modo cpf com valor do servidor; sem query = modo cpf vazio),
+    ?mode=cpf-or-email, ?pre=someone@idp (modo cpf, valor que nao e CPF) e ?mode=email (inerte).
+  Saida: itens OK/FAIL/SKIP em #results e "cpf-mask: N ok, M fail" em #summary e no console.
+    google-chrome --headless=new --no-sandbox --disable-gpu --dump-dom \
+      "file://$PWD/tests/cpf-mask.html?pre=12345678909" 2>/dev/null \
+      | grep -oE '<li>(FAIL|SKIP)[^<]*|cpf-mask: [0-9]+ ok, [0-9]+ fail'
+  Sem a linha de resumo, a pagina quebrou antes do fim (ver README, secao Testes).
+-->
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Teste cpf-mask</title></head>
+<body>
+<p><a href="?pre=12345678909">cpf</a> | <a href="?mode=cpf-or-email">cpf-or-email</a> | <a href="?pre=someone@idp">valor de IdP</a> | <a href="?mode=email">email</a></p>
+<!-- return false: Enter/botao a mao nao navega; autocomplete=off: recarregar nao restaura o valor -->
+<form onsubmit="return false">
+    <input id="username" name="username" type="text" autocomplete="off">
+    <button>Enviar</button>
+</form>
+<ol id="results"></ol>
+<p id="summary"></p>
+<script>
+    // Antes do cpf-mask.js: ele le o modo e o valor inicial uma vez, no DOMContentLoaded
+    var Q = new URLSearchParams(location.search), MODE = Q.get("mode") || "cpf", PRE = Q.get("pre") || "";
+    var f = document.getElementById("username"), N = 0, M = 0, ERRS = [];
+    document.body.setAttribute("data-username-format", MODE);
+    if (PRE) f.setAttribute("value", PRE); // como o value= do FTL
+    // Excecao num listener da mascara nao chega a quem disparou o evento: so aparece aqui
+    window.addEventListener("error", function (e) { ERRS.push(e.message); });
+    function out(s) { var li = document.createElement("li"); li.textContent = s; document.getElementById("results").appendChild(li); console.log(s); }
+    function ok(name, got, want) {
+        var pass = got === want; pass ? N++ : M++;
+        out((pass ? "OK " : "FAIL ") + name + (pass ? "" : ': veio "' + got + '", esperado "' + want + '"'));
+    }
+</script>
+<!-- onerror so pega arquivo nao encontrado; erro de sintaxe no script cai no listener de error acima -->
+<script src="../themes/default/login/resources/js/cpf-mask.js" onerror="ERRS.push('cpf-mask.js nao encontrado')"></script>
+<script>
+    // Navegador simulado: edita no cursor, poe o cursor depois do texto e so entao dispara input
+    function fire(type) { f.dispatchEvent(new Event(type, { bubbles: true })); }
+    function at(pos) { f.setSelectionRange(pos, pos); }
+    function put(text) { // uma tecla ou um colar
+        var s = f.selectionStart, v = f.value;
+        f.value = v.slice(0, s) + text + v.slice(f.selectionEnd);
+        at(s + text.length);
+        fire("input");
+    }
+    function type(text) { for (var i = 0; i < text.length; i++) put(text[i]); }
+    // Backspace/Delete: keydown antes (a mascara pode pular um separador), depois apaga no cursor
+    function key(k) {
+        f.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+        var s = f.selectionStart - (k === "Backspace" ? 1 : 0), v = f.value;
+        f.value = v.slice(0, s) + v.slice(s + 1);
+        at(s);
+        fire("input");
+    }
+    // Roda os listeners de submit e devolve o que iria ao servidor; evento sintetico nao navega
+    function submit() { f.form.dispatchEvent(new Event("submit", { cancelable: true })); return f.value; }
+    function clear() { f.value = ""; fire("input"); } // U volta a ""; obrigatorio antes de digitar apos submit()
+    function vc() { return f.value + "|" + f.selectionStart; } // valor|cursor
+
+    // load vem depois do DOMContentLoaded em que a mascara inicia; tudo sincrono (o --dump-dom sai no load)
+    window.addEventListener("load", function () {
+        f.focus(); // a mascara so move o cursor com o campo em document.activeElement
+        ok("campo em foco", document.activeElement === f, true);
+        if (MODE === "email") { // ?mode=email: o username e o e-mail, a mascara nao faz nada
+            type("12345678909"); ok("modo email: campo intacto", f.value, "12345678909");
+            ok("modo email: nao iniciou", f.dataset.cpfMask, undefined); ok("modo email: enviado intacto", submit(), "12345678909");
+        } else if (MODE === "cpf" && /\D/.test(PRE)) { // ?pre=someone@idp: so o normalizador de envio
+            ok("valor do IdP intacto", f.value, PRE);
+            ok("sem placeholder nem inputmode", f.hasAttribute("placeholder") || f.hasAttribute("inputmode"), false);
+            ok("valor do IdP enviado intacto", submit(), PRE);
+            clear(); type("1234"); ok("sem mascara nesta carga", f.value, "1234");
+            // com pontuacao: so digitos passaria mesmo sem o normalizador
+            clear(); type("123.456.789-09"); ok("CPF completo digitado vai em digitos", submit(), "12345678909");
+        } else if (MODE === "cpf") { // ?pre=12345678909, ou sem query
+            if (PRE) { ok("valor do servidor formatado", f.value, "123.456.789-09"); ok("valor do servidor enviado em digitos", submit(), "12345678909"); }
+            ok("inputmode e placeholder", f.getAttribute("inputmode") + " " + f.placeholder, "numeric 000.000.000-00");
+            clear(); type("123456789"); ok("9 digitos sem hifen pendente", vc(), "123.456.789|11");
+            type("09"); ok("digita CPF", vc(), "123.456.789-09|14"); ok("envia 11 digitos", submit(), "12345678909");
+            clear(); type("1a23456789099"); ok("letra e 12o digito descartados", vc(), "123.456.789-09|14");
+            key("Backspace"); key("Backspace"); ok("Backspace no fim leva o hifen junto", vc(), "123.456.789|11");
+            if (document.activeElement === f) { // sem foco a mascara nao move o cursor e estes quatro mudam de valor
+                clear(); type("123456"); at(4); key("Backspace"); ok("Backspace logo apos o ponto apaga o 3", vc(), "124.56|2");
+                clear(); type("123456"); at(3); key("Delete"); ok("Delete logo antes do ponto apaga o 4", vc(), "123.56|4");
+                clear(); type("123456"); at(2); type("9"); ok("insere no meio, cursor apos o 9 e o ponto", vc(), "129.345.6|4");
+                clear(); type("100"); at(1); type("05"); ok("0 digitado antes de outro 0", vc(), "105.00|4");
+            } else out("SKIP 4 cenarios de cursor: campo sem foco");
+            // IME: o teclado troca a palavra em composicao; nada pode ser reescrito antes do compositionend
+            clear(); type("123"); fire("compositionstart"); f.value = "12345"; fire("input");
+            ok("IME compondo: campo intocado", f.value, "12345");
+            fire("compositionend"); ok("IME: formata uma vez, sem duplicar", vc(), "123.45|6");
+            // valor posto sem evento input (restauracao do navegador, autofill)
+            clear(); f.value = "12345678909"; fire("focus"); ok("focus formata valor posto sem input", f.value, "123.456.789-09");
+            key("Backspace"); ok("e edita a partir dele", vc(), "123.456.789-0|13");
+        } else { // ?mode=cpf-or-email
+            ok("script iniciou", f.dataset.cpfMask, MODE);
+            type("user@x.com"); ok("e-mail intacto", f.value, "user@x.com"); ok("e-mail enviado como digitado", submit(), "user@x.com");
+            clear(); type("123.abc@x.com"); ok("ponto do proprio usuario fica", f.value, "123.abc@x.com");
+            clear(); type("123.456.789-09"); ok("CPF digitado com pontuacao vai em digitos", submit(), "12345678909");
+            // 4 digitos: o ponto que a mascara pos em 123.4 nao pode entrar no e-mail
+            clear(); type("1234@x.com"); ok("e-mail com digitos, sem o ponto da mascara", f.value, "1234@x.com");
+            clear(); type("123456789091"); ok("12 digitos ficam crus", f.value, "123456789091");
+            key("Backspace"); ok("de volta a 11, a mascara volta", f.value, "123.456.789-09");
+            clear(); type("12345"); ok("parcial mascarado", f.value, "123.45"); ok("parcial enviado em digitos", submit(), "12345");
+            // colar no modo misto: em modo cpf o descarte de nao-digitos esconderia a regressao. Separadores
+            // fora do lugar: o envio ja normaliza CPF pontuado, so a exibicao mostra se a regra do colar existe
+            clear(); put("1234567890-9"); ok("colar CPF pontuado", vc(), "123.456.789-09|14"); ok("colado enviado em digitos", submit(), "12345678909");
+            clear(); f.value = "123.456.789-09"; ok("autofill sem input vai em digitos", submit(), "12345678909");
+            clear(); f.value = "1234567890-9"; fire("focus"); ok("autofill com pontuacao fora do lugar e mascarado", f.value, "123.456.789-09");
+        }
+        ok("sem erros de script", ERRS.length ? ERRS.length + "x " + ERRS[0] : "", "");
+        clear(); // campo vazio e vivo para testar a mao
+        var s = "cpf-mask: " + N + " ok, " + M + " fail";
+        document.getElementById("summary").textContent = s; console.log(s);
+    });
+</script>
+</body>
+</html>

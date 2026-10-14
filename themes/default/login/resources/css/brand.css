@@ -23,8 +23,10 @@
     --app-aside-ink: var(--grey-100);
     --app-aside-map: rgba(255, 255, 255, .24);
     --app-aside-map-hi: var(--secondary-light);
-    --app-aside-accent: var(--secondary-main); /* palavra em destaque do appWelcomeTitle (gancho, sem uso hoje:
-                                                  a mensagem aceita <span class="app-aside__accent">) */
+
+    /* Monograma (logo-single.png) no canto superior esquerdo do login: o navy da casa
+       some na superficie escura, entao vira silhueta branca. */
+    --app-logo-filter: brightness(0) invert(1);
 
     /* Anel de foco com o rgb de --app-accent; sombras pretas (sobre fundo escuro uma
        sombra colorida nao aparece). Os alfas sao parte do valor. */
